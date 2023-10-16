@@ -27,7 +27,7 @@ public class ScrabbleBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return "6657002623:AAEGg2IxfWbs0SU3iwqh575ECd7j_g7GOgA";
+        return Token.TOKEN;
     }
 
     private void sendResponse(long chatId, String s) {

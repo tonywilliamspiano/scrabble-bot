@@ -41,24 +41,13 @@ public class Player {
             hand.remove(c);
         }
 
-        addToHand(letterBag.getLetters(7 - hand.size()));
+        addToHand(7 - hand.size());
+        score += Dictionary.scoreWord(move.getWord());
     }
 
-    public void addToHand(Character...characters) {
-        for (Character c : characters) {
-            if (hand.size() >= 7) {
-                throw new RuntimeException("Could not add - hand is full!");
-            }
-            hand.add(c);
-        }
-    }
-
-    public void addToHand(List<Character> characters) {
-        for (Character c : characters) {
-            if (hand.size() >= 7) {
-                throw new RuntimeException("Could not add - hand is full!");
-            }
-            hand.add(c);
+    public void addToHand(int num) {
+        for (int i = 0; i < num; i++) {
+            hand.add(letterBag.getLetter());
         }
     }
 

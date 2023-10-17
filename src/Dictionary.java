@@ -4,14 +4,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Dictionary {
 
-    List<String> words = new ArrayList<>();
-    int dictionarySize;
+    private static List<String> words = new ArrayList<>();
+    private static int dictionarySize;
+    private LetterValues letterValues = new LetterValues();
 
     Dictionary() throws FileNotFoundException {
-        String filePath = "dictionary.txt"; // Replace with the path to your file
+        String filePath = "dictionary.txt";
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath)) ) {
             String line;
@@ -23,7 +25,7 @@ public class Dictionary {
         }
     }
 
-    public boolean isValidWord(String word) {
+    public static boolean isValidWord(String word) {
         word = word.toUpperCase();
 
         int left = 0;
@@ -43,5 +45,14 @@ public class Dictionary {
             }
         }
         return false;
+    }
+
+    static int scoreWord(String word) {
+        int wordScore = 0;
+
+        for (int i = 0; i < word.length(); i++) {
+            wordScore += LetterValues.get(word.charAt(i));
+        }
+        return wordScore;
     }
 }

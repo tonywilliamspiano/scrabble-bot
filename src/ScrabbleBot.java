@@ -3,15 +3,16 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ScrabbleBot extends TelegramLongPollingBot {
     List<User> users = new ArrayList<>();
+    Dictionary dictionary;
 
-    ScrabbleBot() {
+    ScrabbleBot() throws FileNotFoundException {
+        this.dictionary = new Dictionary();
     }
     @Override
     public void onUpdateReceived(Update update) {

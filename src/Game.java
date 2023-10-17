@@ -4,77 +4,92 @@ import java.util.ArrayList;
 public class Game {
     private static final int WIDTH = 15;
     private static final int HEIGHT = 15;
-    private int playerOneScore;
-    private int playerTwoScore;
+    private LetterBag letterBag = new LetterBag();
+    private Player playerOne = new Player("");
+    private Player playerTwo = new Player("");
     private char[][] board = new char[HEIGHT][WIDTH];
 
-
-    private String playerOneName;
-    private String playerTwoName;
-
     Game() {
-        playerOneScore = 0;
-        playerTwoScore = 0;
+        initializeBoard();
+    }
+
+    private void initializeBoard() {
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
+                board[i][j] = '.';
+            }
+        }
     }
 
     public String boardAsString() {
-        ArrayList<Character> shortLetters = new ArrayList<>();
-
-        shortLetters.add('f');
-        shortLetters.add('i');
-        shortLetters.add('j');
-        shortLetters.add('l');
-        shortLetters.add('I');
-        shortLetters.add('C');
-        shortLetters.add('E');
-        shortLetters.add('H');
-        shortLetters.add('J');
-
-        String result = ".   ";
-        char column = 'a';
+        String result = "```   ";
 
         for (char row = 'A'; row < 'A' + WIDTH; row++) {
-            result += row + "  ";
-            if (shortLetters.contains(row)) {
-                result += " ";
-            }
+            result += row + " ";
         }
         result += "\n";
 
         for (int i = 0; i < HEIGHT; i++) {
-            result += column;
-            if (shortLetters.contains(column)) {
+            result += (i + 1) + " ";
+            if (i < 9) {
                 result += " ";
             }
 
-
             for (int j = 0; j < WIDTH; j++) {
-                if (i == 4 && j == 3) {
-                    result += " J ";
-                }
-                else {
-                    result += "  . ";
-                }
-                result += "|";
+                result += board[i][j] + " ";
             }
             result += "\n";
-            column++;
-            if (column == 'm') {
-                column++;
-            }
         }
+        result += "```";
         return result;
     }
 
     public String getScore() {
-        return playerOneName + " : " + playerOneScore + "\n"
-                + playerTwoName + " : " + playerTwoScore;
+        return playerOne.getName() + " : " + playerOne.getScore() + "\n"
+                + playerTwo.getName() + " : " + playerTwo.getScore();
     }
-    public void setPlayerOneName(String playerOneName) {
-        this.playerOneName = playerOneName;
+    public void addPlayer(Player player) {
+        // Make sure no empty names get inputted
+        if (player.getName().isEmpty()) {
+            throw new RuntimeException("No empty names allowed!");
+        }
+
+        // Add player to game if game is not full
+        if (playerOne.getName().isEmpty()) {
+            this.playerOne = player;
+        }
+        else if (playerTwo.getName().isEmpty()) {
+            this.playerTwo = player;
+        }
+        else {
+            throw new RuntimeException("Game already has two players!");
+        }
+
+        player.setLetterBag(letterBag);
     }
 
-    public void setPlayerTwoName(String playerTwoName) {
-        this.playerTwoName = playerTwoName;
+    public Player getPlayerOne() {
+        return playerOne;
+    }
+
+    public Player getPlayerTwo() {
+        return playerTwo;
+    }
+
+    public void addWord(Move move) {
+        for (int i = 0; i < move.getWord().length(); i++) {
+            board[move.getY()][move.getX()] = move.getWord().charAt(i);
+            move.increment();
+        }
+    }
+
+    public String showPlayerOneHand() {
+        String result = "Your hand: ";
+
+        for (Character c : playerOne.getHand()) {
+            result += c + " ";
+        }
+
+        return result;
     }
 }

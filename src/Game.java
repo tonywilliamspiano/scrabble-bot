@@ -4,10 +4,12 @@ import java.util.ArrayList;
 public class Game {
     private static final int WIDTH = 15;
     private static final int HEIGHT = 15;
+    private long owner;
     private LetterBag letterBag = new LetterBag();
     private Player playerOne = new Player("");
     private Player playerTwo = new Player("");
     private char[][] board = new char[HEIGHT][WIDTH];
+    private boolean isStarted = false;
 
     Game() {
         initializeBoard();
@@ -91,5 +93,21 @@ public class Game {
         }
 
         return result;
+    }
+
+    public boolean isStarted() {
+        return isStarted;
+    }
+
+    public void setIsStarted(boolean started) {
+        isStarted = started;
+    }
+
+    public long getOwner() {
+        return owner;
+    }
+
+    public void setOwner(long owner) {
+        this.owner = owner;
     }
 }

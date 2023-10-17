@@ -6,6 +6,7 @@ public class Player {
     private int score = 0;
     private List<Character> hand = new ArrayList<>();
     private LetterBag letterBag;
+    private long userID;
 
 
     public Player(String name) {
@@ -63,5 +64,13 @@ public class Player {
 
     public void setLetterBag(LetterBag letterBag) {
         this.letterBag = letterBag;
+    }
+
+    public long getUserID() {
+        return userID;
+    }
+
+    public void setUserID(long userID) {
+        this.userID = userID;
     }
 }

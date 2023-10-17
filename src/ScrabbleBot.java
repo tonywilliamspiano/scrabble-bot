@@ -2,39 +2,55 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
-import org.telegram.telegrambots.meta.generics.LongPollingBot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ScrabbleBot extends TelegramLongPollingBot {
-    Game game = new Game();
+    List<User> users = new ArrayList<>();
 
     ScrabbleBot() {
-        game.addPlayer(new Player("Tony"));
-        game.addPlayer(new Player("Moritz"));
     }
     @Override
     public void onUpdateReceived(Update update) {
         try {
             long chatId = update.getMessage().getChatId();
             String messageReceived = update.getMessage().getText();
+            long userId = update.getMessage().getFrom().getId();
 
-            takeTurn(messageReceived, chatId);
+            int userIndex = userExists(userId);
+            User user;
+            // If user exists, let him process the request
+            if (userIndex >= 0) {
+                user = users.get(userIndex);
+                user.resetResponse();
+                user.parseCommand(messageReceived, userId);
+            }
+            else {
+                user = new User(userId, chatId);
+                users.add(user);
+                user.welcome();
+            }
+            sendResponse(userId, user.getResponse());
         }
         catch (Exception e) {
             System.out.println("Exception caught! " + e.getMessage());
         }
     }
 
-    private void takeTurn(String messageReceived, long chatId) {
-        Move move = MoveParser.parseMove(messageReceived);
-        game.addWord(move);
-        game.getPlayerOne().makeMove(move);
+    private int userExists(long userId) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getId() == userId) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
-        sendResponse(chatId, game.getScore());
-        sendResponse(chatId, game.boardAsString());
-        sendResponse(chatId, game.showPlayerOneHand());
+    private boolean isValidGameId(String messageReceived) {
+        return false;
     }
 
     @Override

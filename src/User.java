@@ -1,7 +1,10 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class User {
     private final long chatId;
     private final long userId;
-    private Game game = new Game();
+    private Game game;
     String response = "";
     private Status status = Status.UNINITIALIZED;
 
@@ -39,19 +42,27 @@ public class User {
             this.status = Status.SEARCHING;
         }
         else if (status == Status.SEARCHING) {
-            response += "Searching for game...";
+            response += "Found your game!\n";
+            showGameState();
         }
         else if (status == Status.GET_NAME){
-            game.addPlayer(new Player(messageReceived));
+            Player player = new Player(messageReceived);
+            game.addPlayer(player);
+            player.addToHand(7);
             response += "You were added to the game!";
 
             // Placeholder!
             game.addPlayer(new Player("Max Mustermann"));
 
             status = Status.PLAYING;
+            showGameState();
         }
         else if (status == Status.PLAYING) {
             takeTurn(messageReceived);
+        }
+        else {
+            response += "Word format wrong or not recognized! Enter in format: WORD H5 DOWN\n\n";
+            showGameState();
         }
     }
 
@@ -61,9 +72,42 @@ public class User {
 
     public void takeTurn(String messageReceived) {
         Move move = MoveParser.parseMove(messageReceived);
-        game.addWord(move);
-        game.getPlayerOne().makeMove(move);
+        if (Dictionary.isValidWord(move.getWord()) == false) {
+            response += "Invalid word! " + move.getWord();
+        }
+        else if (wordNotPossible(move)) {
+            response += "Move not possible with your letters! " + move.getWord() + "\n\n";
+        }
+        else {
+            game.addWord(move);
+            game.getPlayerOne().makeMove(move);
+        }
 
+        showGameState();
+    }
+
+    private boolean wordNotPossible(Move move) {
+        List<Character> handLetters = new ArrayList<>();
+        List<Character> wordLetters = new ArrayList<>();
+
+        handLetters.addAll(game.getPlayerOne().getHand());
+
+        for (int i = 0; i < move.getWord().length(); i++) {
+            wordLetters.add(move.getWord().charAt(i));
+        }
+
+        for (Character c : wordLetters) {
+            if (!handLetters.contains(c)) {
+                return true;
+            }
+            else {
+                handLetters.remove(c);
+            }
+        }
+        return false;
+    }
+
+    public void showGameState() {
         response += game.getScore();
         response += game.boardAsString();
         response += game.showPlayerOneHand();

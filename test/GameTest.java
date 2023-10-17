@@ -1,9 +1,11 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.FileNotFoundException;
+
 public class GameTest {
     @Test
-    void gameInit() {
+    void gameInit() throws FileNotFoundException {
         Game game = new Game();
         Player player = new Player("player1");
         Player player2 = new Player("player2");

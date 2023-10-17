@@ -2,6 +2,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class PlayerTest {
         Assert.assertEquals("Tony", tony.getName());
 
         // Add multiple characters to hand
-        tony.addToHand('a', 'b', 'c');
+        tony.addToHand(3);
 
         // Test against array list of characters
         List<Character> hand = new ArrayList<>();
@@ -23,7 +24,7 @@ public class PlayerTest {
 
         Assert.assertTrue("Hand initialization failed", hand.equals(tony.getHand()));
 
-        tony.addToHand('d', 'd', 'd', 'd');
+        tony.addToHand(5);
 
         Assert.assertThrows(Exception.class, () -> tony.addToHand('a'));
     }
@@ -36,7 +37,7 @@ public class PlayerTest {
 
         Move move = new Move("ZEBRA", 6, 6, Direction.DOWN);
 
-        tony.addToHand('Z', 'E', 'B', 'R', 'A', 'A');
+        tony.addToHand(6);
 
         tony.makeMove(move);
         game.addWord(move);

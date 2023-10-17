@@ -10,14 +10,31 @@ import java.util.List;
 public class ScrabbleBot extends TelegramLongPollingBot {
     Game game = new Game();
 
+    ScrabbleBot() {
+        game.addPlayer(new Player("Tony"));
+        game.addPlayer(new Player("Moritz"));
+    }
     @Override
     public void onUpdateReceived(Update update) {
-        long chatId = update.getMessage().getChatId();
-        String messageReceived = update.getMessage().getText();
-        game.setPlayerOneName("Tony");
-        game.setPlayerTwoName("Moritz");
+        try {
+            long chatId = update.getMessage().getChatId();
+            String messageReceived = update.getMessage().getText();
+
+            takeTurn(messageReceived, chatId);
+        }
+        catch (Exception e) {
+            System.out.println("Exception caught! " + e.getMessage());
+        }
+    }
+
+    private void takeTurn(String messageReceived, long chatId) {
+        Move move = MoveParser.parseMove(messageReceived);
+        game.addWord(move);
+        game.getPlayerOne().makeMove(move);
+
         sendResponse(chatId, game.getScore());
         sendResponse(chatId, game.boardAsString());
+        sendResponse(chatId, game.showPlayerOneHand());
     }
 
     @Override

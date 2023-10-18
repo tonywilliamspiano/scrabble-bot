@@ -1,3 +1,7 @@
+package gameplay;
+
+import dictionary.Dictionary;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +35,10 @@ public class User {
         return response;
     }
 
-    // Todo change this into a switch statement based on Status.
+    // Todo change this into a switch statement based on gameplay.Status.
     public void handleCommand(String messageReceived, long userId) {
         if (status == Status.UNINITIALIZED && messageReceived.toUpperCase().equals("START")) {
-            response += "Game created with ID: TEST\nPlease enter your name: ";
+            response += "gameplay.Game created with ID: TEST\nPlease enter your name: ";
             status = Status.GET_NAME;
         }
         else if (status == Status.UNINITIALIZED && messageReceived.toUpperCase().equals("JOIN")) {
@@ -76,7 +80,7 @@ public class User {
             response += "Invalid word! " + move.getWord();
         }
         else if (wordNotPossible(move)) {
-            response += "Move not possible with your letters! " + move.getWord() + "\n\n";
+            response += "gameplay.Move not possible with your letters! " + move.getWord() + "\n\n";
         }
         else {
             game.addWord(move);

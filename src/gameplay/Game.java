@@ -1,5 +1,6 @@
-import java.lang.reflect.Array;
-import java.util.ArrayList;
+package gameplay;
+
+import dictionary.LetterBag;
 
 public class Game {
     private static final int WIDTH = 15;
@@ -11,7 +12,7 @@ public class Game {
     private char[][] board = new char[HEIGHT][WIDTH];
     private boolean isStarted = false;
 
-    Game(long owner) {
+    public Game(long owner) {
         this.owner = owner;
         initializeBoard();
     }
@@ -65,7 +66,7 @@ public class Game {
             this.playerTwo = player;
         }
         else {
-            throw new RuntimeException("Game already has two players!");
+            throw new RuntimeException("gameplay.Game already has two players!");
         }
 
         player.setLetterBag(letterBag);

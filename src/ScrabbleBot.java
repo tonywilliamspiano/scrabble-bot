@@ -1,7 +1,10 @@
+import dictionary.Dictionary;
+import gameplay.User;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import secret.Token;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

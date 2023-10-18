@@ -1,3 +1,5 @@
+package dictionary;
+
 import java.util.*;
 
 public class LetterBag {
@@ -5,7 +7,7 @@ public class LetterBag {
 
     private Stack<Character> letters = new Stack<>();
 
-    LetterBag() {
+    public LetterBag() {
         fill();
         Collections.shuffle(letters);
     }

@@ -1,3 +1,5 @@
+package gameplay;
+
 public enum Status {
     UNINITIALIZED,
     SEARCHING,

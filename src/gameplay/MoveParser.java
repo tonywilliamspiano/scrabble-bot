@@ -1,3 +1,5 @@
+package gameplay;
+
 public class MoveParser {
 
     public static Move parseMove(String input) {

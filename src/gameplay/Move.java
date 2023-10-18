@@ -1,3 +1,5 @@
+package gameplay;
+
 public class Move {
     private  String word;
     private  int x;

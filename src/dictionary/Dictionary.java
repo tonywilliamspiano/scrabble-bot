@@ -1,10 +1,11 @@
+package dictionary;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Dictionary {
 
@@ -12,7 +13,7 @@ public class Dictionary {
     private static int dictionarySize;
     private LetterValues letterValues = new LetterValues();
 
-    Dictionary() throws FileNotFoundException {
+    public Dictionary() throws FileNotFoundException {
         String filePath = "dictionary.txt";
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath)) ) {
@@ -47,7 +48,7 @@ public class Dictionary {
         return false;
     }
 
-    static int scoreWord(String word) {
+    public static int scoreWord(String word) {
         int wordScore = 0;
 
         for (int i = 0; i < word.length(); i++) {

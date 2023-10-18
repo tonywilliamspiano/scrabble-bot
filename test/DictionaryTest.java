@@ -1,3 +1,4 @@
+import dictionary.Dictionary;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

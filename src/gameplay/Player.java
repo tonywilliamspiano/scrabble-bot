@@ -1,3 +1,8 @@
+package gameplay;
+
+import dictionary.Dictionary;
+import dictionary.LetterBag;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +38,7 @@ public class Player {
         return hand;
     }
 
-    // Move should be made before game board is updated!
+    // gameplay.Move should be made before game board is updated!
     public void makeMove(Move move) {
         String word = move.getWord();
         for (int i = 0; i < word.length(); i++) {

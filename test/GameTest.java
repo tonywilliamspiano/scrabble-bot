@@ -1,3 +1,7 @@
+import gameplay.Game;
+import gameplay.Move;
+import gameplay.MoveParser;
+import gameplay.Player;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

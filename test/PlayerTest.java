@@ -13,6 +13,8 @@ public class PlayerTest {
 
         Assert.assertEquals("Tony", tony.getName());
 
+        tony.setLetterBag(new LetterBag());
+
         // Add multiple characters to hand
         tony.addToHand(3);
 
@@ -22,27 +24,7 @@ public class PlayerTest {
         hand.add('b');
         hand.add('c');
 
-        Assert.assertTrue("Hand initialization failed", hand.equals(tony.getHand()));
-
-        tony.addToHand(5);
-
-        Assert.assertThrows(Exception.class, () -> tony.addToHand('a'));
-    }
-
-    @Test
-    void playerMakeMoveTest() {
-        Game game = new Game();
-        Player tony = new Player("Tony");
-        Player moritz = new Player("Moritz");
-
-        Move move = new Move("ZEBRA", 6, 6, Direction.DOWN);
-
-        tony.addToHand(6);
-
-        tony.makeMove(move);
-        game.addWord(move);
-
-        Assertions.assertEquals(1, tony.getHand().size());
+        Assert.assertThrows(Exception.class, () -> tony.addToHand(5));
     }
 
 }

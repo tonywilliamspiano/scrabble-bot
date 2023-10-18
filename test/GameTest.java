@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 public class GameTest {
     @Test
     void gameInit() throws FileNotFoundException {
-        Game game = new Game();
+        Game game = new Game(0);
         Player player = new Player("player1");
         Player player2 = new Player("player2");
 

@@ -8,7 +8,7 @@ public class LetterBagTest {
 
         Player tony = new Player("Tony");
         int size = letterBag.getLetterBag().size();
-
+        tony.setLetterBag(letterBag);
         tony.addToHand(7);
 
         Assertions.assertEquals(size - 7, letterBag.getLetterBag().size());

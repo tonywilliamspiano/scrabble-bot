@@ -47,6 +47,9 @@ public class Player {
 
     public void addToHand(int num) {
         for (int i = 0; i < num; i++) {
+            if (hand.size() >=7) {
+                throw new RuntimeException("Hand already full!");
+            }
             hand.add(letterBag.getLetter());
         }
     }
@@ -61,5 +64,14 @@ public class Player {
 
     public void setUserID(long userID) {
         this.userID = userID;
+    }
+
+    public void addToHand(Character...characters) {
+        for (Character c : characters) {
+            if (hand.size() >= 7) {
+                throw new RuntimeException("Hand already full!");
+            }
+            hand.add(c);
+        }
     }
 }

@@ -18,4 +18,8 @@ public class GameLibrary {
 	public static void add(String id, Game game) {
 		games.put(id, game);
 	}
+
+	public static Game get(String messageReceived) {
+		return games.get(messageReceived);
+	}
 }

@@ -34,11 +34,14 @@ public class ScrabbleBot extends TelegramLongPollingBot {
                 user = users.get(userIndex);
                 user.resetResponse();
                 user.handleCommand(messageReceived, userId);
+                sendNotificationIfNecessary(user);
             }
             else {
                 user = new User(userId, chatId);
                 users.add(user);
                 user.welcome();
+                System.out.println("added user to game: " + userId);
+                System.out.println("chat id: " + chatId);
             }
             sendResponse(userId, user.getResponse());
         }
@@ -46,6 +49,22 @@ public class ScrabbleBot extends TelegramLongPollingBot {
             sendResponse(userId, "Something went wrong in the backend :( Try again later");
             System.out.println("Exception caught! " + e.getMessage());
         }
+    }
+
+    private void sendNotificationIfNecessary(User user) {
+        if (!user.isReadyToNotify()) {
+            return;
+        }
+
+        System.out.println("Sending notification to " + user.getOpponentId());
+        String response = "Other player has played! Your turn: \n\n";
+        int userIndex = userExists(user.getOpponentId());
+        User opponent = users.get(userIndex);
+
+        opponent.showGameState();
+        response += opponent.getResponse();
+
+        sendResponse(opponent.getId(), response);
     }
 
     private int userExists(long userId) {

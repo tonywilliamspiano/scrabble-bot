@@ -9,6 +9,10 @@ public class User {
     private final long chatId;
     private final long userId;
     private Game game;
+    private Turn myTurn;
+    private Player myPlayer;
+    private boolean readyToNotify = false;
+
     String response = "";
     private Status status = Status.UNINITIALIZED;
 
@@ -47,6 +51,7 @@ public class User {
         }
         else if (status == Status.SEARCHING) {
             if (GameLibrary.containsGame(messageReceived)) {
+                game = GameLibrary.get(messageReceived);
                 response += "Found your game! Enter your name: \n";
                 status = Status.GET_P2_NAME;
             }
@@ -59,20 +64,23 @@ public class User {
         }
         else if (status == Status.GET_P1_NAME){
             // Todo add empty string check here.
-            Player player = new Player(messageReceived);
-            game.addPlayer(player);
-            player.addToHand(7);
+            myPlayer = new Player(messageReceived);
+            game.addPlayer(myPlayer);
+            myPlayer.addToHand(7);
+            myPlayer.setUserID(userId);
             response += "You were added to the game! Enter a passcode for your game: ";
-
+            myTurn = Turn.ONE;
             status = Status.GET_ID;
         }
         else if (status == Status.GET_P2_NAME) {
             // Todo add empty string check here.
-            Player player = new Player(messageReceived);
-            game.addPlayer(player);
-            player.addToHand(7);
+            myPlayer = new Player(messageReceived);
+            game.addPlayer(myPlayer);
+            myPlayer.addToHand(7);
+            myPlayer.setUserID(userId);
             response += "You were added to the game!";
             status = Status.PLAYING;
+            myTurn = Turn.TWO;
         }
         else if (status == Status.GET_ID) {
             if (GameLibrary.containsGame(messageReceived)) {
@@ -86,7 +94,16 @@ public class User {
             }
         }
         else if (status == Status.PLAYING) {
-            takeTurn(messageReceived);
+            if (waitingForPlayer()) {
+                response += "Waiting for other player to join...\n";
+            }
+            else if  (isMyTurn()) {
+                takeTurn(messageReceived);
+            }
+            else {
+                response += "Not your turn! Wait for other player.\n\n";
+                showGameState();
+            }
         }
         else {
             response += "Word format wrong or not recognized! Enter in format: WORD H5 DOWN\n\n";
@@ -94,17 +111,33 @@ public class User {
         }
     }
 
+    private boolean waitingForPlayer() {
+        System.out.println(game.isReady());
+        if (game.isReady()) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    private boolean isMyTurn() {
+        return game.whoseTurn() == myTurn;
+    }
+
     public void takeTurn(String messageReceived) {
         Move move = MoveParser.parseMove(messageReceived);
         if (Dictionary.isValidWord(move.getWord()) == false) {
-            response += "Invalid word! " + move.getWord();
+            response += "Invalid word! " + move.getWord() + "\n\n";
         }
         else if (wordNotPossible(move)) {
             response += "Move not possible with your letters! " + move.getWord() + "\n\n";
         }
         else {
             game.addWord(move);
-            game.getPlayerOne().makeMove(move);
+            myPlayer.makeMove(move);
+            game.switchTurn();
+            readyToNotify = true;
         }
 
         showGameState();
@@ -114,7 +147,7 @@ public class User {
         List<Character> handLetters = new ArrayList<>();
         List<Character> wordLetters = new ArrayList<>();
 
-        handLetters.addAll(game.getPlayerOne().getHand());
+        handLetters.addAll(myPlayer.getHand());
 
         for (int i = 0; i < move.getWord().length(); i++) {
             wordLetters.add(move.getWord().charAt(i));
@@ -134,6 +167,23 @@ public class User {
     public void showGameState() {
         response += game.getScore();
         response += game.boardAsString();
-        response += game.showPlayerOneHand();
+        response += game.showPlayerHand(myPlayer);
+    }
+
+    public boolean isReadyToNotify() {
+        return readyToNotify;
+    }
+
+    public void wasNotified() {
+        readyToNotify = false;
+    }
+
+    public long getOpponentId() {
+        if (game.getPlayerOne() == myPlayer) {
+            return game.getPlayerTwo().getUserID();
+        }
+        else {
+            return game.getPlayerOne().getUserID();
+        }
     }
 }

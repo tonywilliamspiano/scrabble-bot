@@ -11,10 +11,13 @@ public class Game {
     private Player playerTwo = new Player("");
     private char[][] board = new char[HEIGHT][WIDTH];
     private boolean isStarted = false;
+    private Turn turn;
+    private boolean isReady;
 
     public Game(long owner) {
         this.owner = owner;
         initializeBoard();
+        turn = Turn.ONE;
     }
 
     private void initializeBoard() {
@@ -44,13 +47,13 @@ public class Game {
             }
             result += "\n";
         }
-        result += "```";
+        result += "```\n\n";
         return result;
     }
 
     public String getScore() {
         return playerOne.getName() + " : " + playerOne.getScore() + "\n"
-                + playerTwo.getName() + " : " + playerTwo.getScore();
+                + playerTwo.getName() + " : " + playerTwo.getScore() + "\n\n";
     }
     public void addPlayer(Player player) {
         // Make sure no empty names get inputted
@@ -61,12 +64,15 @@ public class Game {
         // Add player to game if game is not full
         if (playerOne.getName().isEmpty()) {
             this.playerOne = player;
+            System.out.println("set player 1 to " + playerOne.getName());
         }
         else if (playerTwo.getName().isEmpty()) {
             this.playerTwo = player;
+            System.out.println("set player 2 to " + playerTwo.getName());
+            isReady = true;
         }
         else {
-            throw new RuntimeException("gameplay.Game already has two players!");
+            throw new RuntimeException("Game already has two players!");
         }
 
         player.setLetterBag(letterBag);
@@ -87,15 +93,6 @@ public class Game {
         }
     }
 
-    public String showPlayerOneHand() {
-        String result = "Your hand: ";
-
-        for (Character c : playerOne.getHand()) {
-            result += c + " ";
-        }
-
-        return result;
-    }
 
     public boolean isStarted() {
         return isStarted;
@@ -109,4 +106,30 @@ public class Game {
         return owner;
     }
 
+    public Turn whoseTurn() {
+        return turn;
+    }
+
+    public void switchTurn() {
+        if (turn == Turn.ONE) {
+            turn = Turn.TWO;
+        }
+        else {
+            turn = Turn.ONE;
+        }
+    }
+
+    public boolean isReady() {
+        return isReady;
+    }
+
+    public String showPlayerHand(Player player) {
+        String result = "Your hand: ";
+
+        for (Character c : player.getHand()) {
+            result += c + " ";
+        }
+
+        return result;
+    }
 }

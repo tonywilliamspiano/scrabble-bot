@@ -10,6 +10,9 @@ import java.util.List;
 public class ScrabbleBot extends TelegramLongPollingBot {
     List<User> users = new ArrayList<>();
     Dictionary dictionary;
+    long userId;
+    String messageReceived;
+    long chatId;
 
     ScrabbleBot() throws FileNotFoundException {
         this.dictionary = new Dictionary();
@@ -17,9 +20,9 @@ public class ScrabbleBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            long chatId = update.getMessage().getChatId();
-            String messageReceived = update.getMessage().getText();
-            long userId = update.getMessage().getFrom().getId();
+            chatId = update.getMessage().getChatId();
+            messageReceived = update.getMessage().getText();
+            userId = update.getMessage().getFrom().getId();
 
             int userIndex = userExists(userId);
             User user;
@@ -27,7 +30,7 @@ public class ScrabbleBot extends TelegramLongPollingBot {
             if (userIndex >= 0) {
                 user = users.get(userIndex);
                 user.resetResponse();
-                user.parseCommand(messageReceived, userId);
+                user.handleCommand(messageReceived, userId);
             }
             else {
                 user = new User(userId, chatId);
@@ -37,6 +40,7 @@ public class ScrabbleBot extends TelegramLongPollingBot {
             sendResponse(userId, user.getResponse());
         }
         catch (Exception e) {
+            sendResponse(userId, "Something went wrong in the backend :( Try again later");
             System.out.println("Exception caught! " + e.getMessage());
         }
     }

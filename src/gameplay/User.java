@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class User {
+    private static final String EXCLAMATION = "❗";
     private final long userId;
     private Game game;
     private Turn myTurn;
@@ -81,10 +82,6 @@ public class User {
         response += "Swap successful! \n\n";
         showGameState();
         endTurn();
-    }
-
-    private void playWord(String messageReceived) {
-        takeTurn(messageReceived);
     }
 
     private void pass() {
@@ -203,21 +200,23 @@ public class User {
         return game.whoseTurn() == myTurn;
     }
 
-    public void takeTurn(String messageReceived) {
+    public void playWord(String messageReceived) {
         Move move = MoveParser.parseMove(messageReceived);
         if (Dictionary.isValidWord(move.getWord()) == false) {
             response += "Invalid word! " + move.getWord() + "\n\n";
-        } else if (wordNotPossible(move)) {
-            response += "Move invalid! " + move.getWord() + "\n\n";
-        } else {
+        }
+        else {
             try {
+                checkIfWordIsPlayable(move);
                 game.addWord(move);
                 myPlayer.makeMove(move);
+                myPlayer.addScore(game.getTempScore());
+                game.setBoardIsEmpty(false);
                 endTurn();
             }
             catch (Exception e) {
                 System.out.println("Caught exception");
-                response += "Invalid move! Try again.\n";
+                response += EXCLAMATION + e.getMessage() + EXCLAMATION + "\n\n";
                 addPrompt();
                 status = Status.TAKE_TURN;
             }
@@ -234,21 +233,15 @@ public class User {
     }
 
     private void addPrompt() {
-        response += "Enter **SWAP**, **PASS** or **PLAY**";
+        response += "Enter **SWAP**, **PASS** or **PLAY**\n\n";
     }
 
-    private boolean wordNotPossible(Move move) {
+    private void checkIfWordIsPlayable(Move move) {
         List<Character> handLetters = new ArrayList<>();
         List<Character> wordLetters = new ArrayList<>();
 
         handLetters.addAll(myPlayer.getHand());
-        try {
-            handLetters.addAll(game.getIntersectingLetters(move));
-        }
-        catch (Exception e) {
-            System.err.println("Invalid move!");
-            return true;
-        }
+        handLetters.addAll(game.getIntersectingLetters(move));
 
         for (int i = 0; i < move.getWord().length(); i++) {
             wordLetters.add(move.getWord().charAt(i));
@@ -256,12 +249,11 @@ public class User {
 
         for (Character c : wordLetters) {
             if (!handLetters.contains(c)) {
-                return true;
+                throw new RuntimeException("You don't have the right letters for that!");
             } else {
                 handLetters.remove(c);
             }
         }
-        return false;
     }
 
     public void showGameState() {

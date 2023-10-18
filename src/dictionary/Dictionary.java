@@ -54,6 +54,8 @@ public class Dictionary {
         for (int i = 0; i < word.length(); i++) {
             wordScore += LetterValues.get(word.charAt(i));
         }
+
+        System.out.println("Scored word: " + word + " for " + wordScore + " points!");
         return wordScore;
     }
 }

@@ -1,5 +1,6 @@
 package gameplay;
 
+import dictionary.Dictionary;
 import dictionary.LetterBag;
 
 import java.util.ArrayList;
@@ -16,6 +17,10 @@ public class Game {
     private boolean isStarted = false;
     private Turn turn;
     private boolean isReady;
+    private int tempScore;
+    private final char SEPARATOR = '.';
+    private boolean isConnected;
+    private boolean boardIsEmpty = true;
 
     public Game(long owner) {
         this.owner = owner;
@@ -26,7 +31,7 @@ public class Game {
     private void initializeBoard() {
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
-                board[i][j] = '.';
+                board[i][j] = SEPARATOR;
             }
         }
     }
@@ -91,7 +96,7 @@ public class Game {
 
     public void addWord(Move move) {
         for (int i = 0; i < move.getWord().length(); i++) {
-            if (board[move.getY()][move.getX()] == '.') {
+            if (board[move.getY()][move.getX()] == SEPARATOR) {
                 board[move.getY()][move.getX()] = move.getWord().charAt(i);
             }
             move.increment();
@@ -146,9 +151,15 @@ public class Game {
         Collection<Character> intersectedLetters = new ArrayList<>();
         int oldX = move.getX();
         int oldY = move.getY();
+        isConnected = false;
+        tempScore = 0;
+
+        char[][] fakeBoard = makeCopyOfBoard();
+
+        checkForIllegalLongerWord(move);
 
         for (int i = 0; i < move.getWord().length(); i++) {
-            if (board[move.getY()][move.getX()] != '.') {
+            if (board[move.getY()][move.getX()] != SEPARATOR) {
                 if (board[move.getY()][move.getX()] != move.getWord().charAt(i)) {
                     throw new RuntimeException("Invalid word!");
                 }
@@ -156,11 +167,161 @@ public class Game {
                     intersectedLetters.add(board[move.getY()][move.getX()]);
                 }
             }
+            else {
+                fakeBoard[move.getY()][move.getX()] = move.getWord().charAt(i);
+            }
+            checkWordsInOtherDirection(move, fakeBoard);
             move.increment();
         }
 
         move.setX(oldX);
         move.setY(oldY);
+
+        // This means that the entire word is already on the board, and the move is invalid
+        if (intersectedLetters.size() == move.getWord().length()) {
+            throw new RuntimeException("Word already on board!");
+        }
+
+        if (isConnected == false && intersectedLetters.isEmpty() && !boardIsEmpty) {
+            throw new RuntimeException("Word must be connected!");
+        }
+
+        else if (boardIsEmpty && firstMoveInvalid(move)) {
+            throw new RuntimeException("First move must intersect H8 square!");
+        }
+
         return intersectedLetters;
+    }
+
+    private boolean firstMoveInvalid(Move move) {
+        int oldX = move.getX();
+        int oldY = move.getY();
+
+        for (int i = 0; i < move.getWord().length(); i++) {
+            System.out.println("X is " + move.getX() + " and Y is " + move.getY());
+            if (move.getX() == HEIGHT / 2 && move.getY() == WIDTH / 2) {
+                move.setX(oldX);
+                move.setY(oldY);
+                return false;
+            }
+            move.increment();
+        }
+
+        move.setX(oldX);
+        move.setY(oldY);
+        return true;
+    }
+
+
+    private char[][] makeCopyOfBoard() {
+        char fakeBoard[][] = new char[HEIGHT][WIDTH];
+
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
+                fakeBoard[i][j] = board[i][j];
+            }
+        }
+        return fakeBoard;
+    }
+
+    private void checkForIllegalLongerWord(Move move) {
+        if (move.getDirection() == Direction.ACROSS) {
+            // If there are letters left of the start of the word, the move is invalid.
+            if (move.getX() > 0 && board[move.getY()][move.getX() - 1] != SEPARATOR) {
+                throw new RuntimeException("Word invalid!");
+            }
+            // If there are letters right of the end of the word, the move is invalid.
+            if (move.getX() + move.getWord().length() < HEIGHT - 1 &&
+                    board[move.getY()][move.getX() + move.getWord().length() + 1] != SEPARATOR)
+            {
+                throw new RuntimeException("Word invalid!");
+            }
+        }
+        else {
+            //Same logic for words going up and down
+            if (move.getY() > 0 && board[move.getY() - 1][move.getX()] != SEPARATOR) {
+                throw new RuntimeException("Word invalid!");
+            }
+            // If there are letters below the end of the word, the move is invalid.
+            if (move.getX() + move.getWord().length() < HEIGHT - 1 &&
+                    board[move.getY() + move.getWord().length() + 1][move.getX()] != SEPARATOR)
+            {
+                throw new RuntimeException("Word invalid!");
+            }
+        }
+
+    }
+
+    private void checkWordsInOtherDirection(Move move, char[][] fakeBoard) {
+        if (move.getDirection() == Direction.ACROSS) {
+            checkUpAndDown(move, fakeBoard);
+        }
+        else {
+            checkLeftAndRight(move, fakeBoard);
+        }
+    }
+
+    private void checkUpAndDown(Move move, char[][] fakeBoard) {
+        int y = move.getY();
+        int x = move.getX();
+        String word = "";
+
+        // Go to top of word
+        while (y > 0 && fakeBoard[y][x] != SEPARATOR) {
+            y--;
+        }
+        if (fakeBoard[y][x] == SEPARATOR) {
+            y++;
+        }
+
+        // Read word into string
+        while (y < HEIGHT && fakeBoard[y][x] != SEPARATOR) {
+            word += fakeBoard[y][x];
+            y++;
+        }
+
+        if (word.length() > 1 && !Dictionary.isValidWord(word)) {
+            throw new RuntimeException("Invalid word");
+        }
+        else if (word.length() > 1) {
+            isConnected = true;
+            tempScore += Dictionary.scoreWord(word);
+        }
+    }
+
+    private void checkLeftAndRight(Move move, char[][] fakeBoard) {
+        int y = move.getY();
+        int x = move.getX();
+        String word = "";
+
+        // Go to top of word
+        while (x > 0 && fakeBoard[y][x] != SEPARATOR) {
+            x--;
+        }
+        if (fakeBoard[y][x] == SEPARATOR) {
+            x++;
+        }
+
+        // Read word into string
+        while (x < HEIGHT && fakeBoard[y][x] != SEPARATOR) {
+            word += fakeBoard[y][x];
+            x++;
+        }
+
+        if (word.length() > 1 && !Dictionary.isValidWord(word)) {
+            throw new RuntimeException("Invalid word");
+        }
+        else if (word.length() > 1) {
+            isConnected = true;
+            tempScore += Dictionary.scoreWord(word);
+        }
+    }
+
+    public int getTempScore() {
+        return tempScore;
+    }
+
+    public void setBoardIsEmpty(boolean boardIsEmpty) {
+        this.boardIsEmpty = boardIsEmpty;
     }
 }

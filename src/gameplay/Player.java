@@ -83,4 +83,8 @@ public class Player {
     public void setHand(List<Character> hand) {
         this.hand = hand;
     }
+
+    public void addScore(int tempScore) {
+        score += tempScore;
+    }
 }

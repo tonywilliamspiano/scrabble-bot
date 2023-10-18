@@ -168,6 +168,12 @@ public class User {
         response += game.showPlayerHand(myPlayer);
     }
 
+    public String getGameState() {
+        return game.getScore()
+                + game.boardAsString()
+                + game.showPlayerHand(myPlayer);
+    }
+
     public boolean isReadyToNotify() {
         return readyToNotify;
     }

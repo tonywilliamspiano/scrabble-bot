@@ -61,6 +61,7 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         response += opponent.getGameState();
 
         sendResponse(opponent.getId(), response);
+        user.wasNotified();
     }
 
     private int userExists(long userId) {

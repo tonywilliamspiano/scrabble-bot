@@ -2,6 +2,9 @@ package gameplay;
 
 import dictionary.LetterBag;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class Game {
     private static final int WIDTH = 15;
     private static final int HEIGHT = 15;
@@ -88,7 +91,9 @@ public class Game {
 
     public void addWord(Move move) {
         for (int i = 0; i < move.getWord().length(); i++) {
-            board[move.getY()][move.getX()] = move.getWord().charAt(i);
+            if (board[move.getY()][move.getX()] == '.') {
+                board[move.getY()][move.getX()] = move.getWord().charAt(i);
+            }
             move.increment();
         }
     }
@@ -135,5 +140,27 @@ public class Game {
 
     public LetterBag getLetterBag() {
         return letterBag;
+    }
+
+    public Collection<Character> getIntersectingLetters(Move move) {
+        Collection<Character> intersectedLetters = new ArrayList<>();
+        int oldX = move.getX();
+        int oldY = move.getY();
+
+        for (int i = 0; i < move.getWord().length(); i++) {
+            if (board[move.getY()][move.getX()] != '.') {
+                if (board[move.getY()][move.getX()] != move.getWord().charAt(i)) {
+                    throw new RuntimeException("Invalid word!");
+                }
+                else {
+                    intersectedLetters.add(board[move.getY()][move.getX()]);
+                }
+            }
+            move.increment();
+        }
+
+        move.setX(oldX);
+        move.setY(oldY);
+        return intersectedLetters;
     }
 }

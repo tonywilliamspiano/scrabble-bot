@@ -208,11 +208,19 @@ public class User {
         if (Dictionary.isValidWord(move.getWord()) == false) {
             response += "Invalid word! " + move.getWord() + "\n\n";
         } else if (wordNotPossible(move)) {
-            response += "Move not possible with your letters! " + move.getWord() + "\n\n";
+            response += "Move invalid! " + move.getWord() + "\n\n";
         } else {
-            game.addWord(move);
-            myPlayer.makeMove(move);
-            endTurn();
+            try {
+                game.addWord(move);
+                myPlayer.makeMove(move);
+                endTurn();
+            }
+            catch (Exception e) {
+                System.out.println("Caught exception");
+                response += "Invalid move! Try again.\n";
+                addPrompt();
+                status = Status.TAKE_TURN;
+            }
         }
 
         showGameState();
@@ -234,6 +242,13 @@ public class User {
         List<Character> wordLetters = new ArrayList<>();
 
         handLetters.addAll(myPlayer.getHand());
+        try {
+            handLetters.addAll(game.getIntersectingLetters(move));
+        }
+        catch (Exception e) {
+            System.err.println("Invalid move!");
+            return true;
+        }
 
         for (int i = 0; i < move.getWord().length(); i++) {
             wordLetters.add(move.getWord().charAt(i));

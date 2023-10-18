@@ -38,28 +38,52 @@ public class User {
     // Todo change this into a switch statement based on gameplay.Status.
     public void handleCommand(String messageReceived, long userId) {
         if (status == Status.UNINITIALIZED && messageReceived.toUpperCase().equals("START")) {
-            response += "gameplay.Game created with ID: TEST\nPlease enter your name: ";
-            status = Status.GET_NAME;
+            response += "Game created!\nPlease enter your name: ";
+            status = Status.GET_P1_NAME;
         }
         else if (status == Status.UNINITIALIZED && messageReceived.toUpperCase().equals("JOIN")) {
             response += "Enter unique game ID: ";
             this.status = Status.SEARCHING;
         }
         else if (status == Status.SEARCHING) {
-            response += "Found your game!\n";
-            showGameState();
+            if (GameLibrary.containsGame(messageReceived)) {
+                response += "Found your game! Enter your name: \n";
+                status = Status.GET_P2_NAME;
+            }
+            else if (messageReceived.equals("EXIT")) {
+                status = Status.UNINITIALIZED;
+            }
+            else {
+                response += "Couldn't find a game with that id... Try again or type EXIT to start over: ";
+            }
         }
-        else if (status == Status.GET_NAME){
+        else if (status == Status.GET_P1_NAME){
+            // Todo add empty string check here.
+            Player player = new Player(messageReceived);
+            game.addPlayer(player);
+            player.addToHand(7);
+            response += "You were added to the game! Enter a passcode for your game: ";
+
+            status = Status.GET_ID;
+        }
+        else if (status == Status.GET_P2_NAME) {
+            // Todo add empty string check here.
             Player player = new Player(messageReceived);
             game.addPlayer(player);
             player.addToHand(7);
             response += "You were added to the game!";
-
-            // Placeholder!
-            game.addPlayer(new Player("Max Mustermann"));
-
             status = Status.PLAYING;
-            showGameState();
+        }
+        else if (status == Status.GET_ID) {
+            if (GameLibrary.containsGame(messageReceived)) {
+                response += "Already taken :( try again! Enter your passcode: ";
+            }
+            else {
+                GameLibrary.add(messageReceived, game);
+                response += "Game created with passcode: " + messageReceived + "\n\n";
+                showGameState();
+                status = Status.PLAYING;
+            }
         }
         else if (status == Status.PLAYING) {
             takeTurn(messageReceived);
@@ -70,17 +94,13 @@ public class User {
         }
     }
 
-    private boolean isValidGameId(String messageReceived) {
-        return false;
-    }
-
     public void takeTurn(String messageReceived) {
         Move move = MoveParser.parseMove(messageReceived);
         if (Dictionary.isValidWord(move.getWord()) == false) {
             response += "Invalid word! " + move.getWord();
         }
         else if (wordNotPossible(move)) {
-            response += "gameplay.Move not possible with your letters! " + move.getWord() + "\n\n";
+            response += "Move not possible with your letters! " + move.getWord() + "\n\n";
         }
         else {
             game.addWord(move);

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class User {
-    private final long chatId;
     private final long userId;
     private Game game;
     private Turn myTurn;
@@ -17,9 +16,8 @@ public class User {
     private Status status = Status.UNINITIALIZED;
 
 
-    public User(long userId, long chatId) {
+    public User(long userId) {
         this.userId = userId;
-        this.chatId = chatId;
         this.game = new Game(userId);
     }
 

@@ -23,7 +23,6 @@ public class ScrabbleBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            chatId = update.getMessage().getChatId();
             messageReceived = update.getMessage().getText();
             userId = update.getMessage().getFrom().getId();
 
@@ -37,11 +36,9 @@ public class ScrabbleBot extends TelegramLongPollingBot {
                 sendNotificationIfNecessary(user);
             }
             else {
-                user = new User(userId, chatId);
+                user = new User(userId);
                 users.add(user);
                 user.welcome();
-                System.out.println("added user to game: " + userId);
-                System.out.println("chat id: " + chatId);
             }
             sendResponse(userId, user.getResponse());
         }
@@ -74,10 +71,6 @@ public class ScrabbleBot extends TelegramLongPollingBot {
             }
         }
         return -1;
-    }
-
-    private boolean isValidGameId(String messageReceived) {
-        return false;
     }
 
     @Override

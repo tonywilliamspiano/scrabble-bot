@@ -33,7 +33,7 @@ public class ScrabbleBot extends TelegramLongPollingBot {
                 user = users.get(userIndex);
                 user.resetResponse();
                 user.handleCommand(messageReceived, userId);
-                sendNotificationIfNecessary(user);
+//                sendNotificationIfNecessary(user);
             }
             else {
                 user = new User(userId);

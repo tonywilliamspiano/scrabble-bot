@@ -12,6 +12,7 @@ public class User {
     public User(long userId, long chatId) {
         this.userId = userId;
         this.chatId = chatId;
+        this.game = new Game(userId);
     }
 
     public long getId() {
@@ -30,10 +31,9 @@ public class User {
         return response;
     }
 
-    public void parseCommand(String messageReceived, long userId) {
+    // Todo change this into a switch statement based on Status.
+    public void handleCommand(String messageReceived, long userId) {
         if (status == Status.UNINITIALIZED && messageReceived.toUpperCase().equals("START")) {
-            game = new Game();
-            game.setOwner(userId);
             response += "Game created with ID: TEST\nPlease enter your name: ";
             status = Status.GET_NAME;
         }

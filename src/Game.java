@@ -11,7 +11,8 @@ public class Game {
     private char[][] board = new char[HEIGHT][WIDTH];
     private boolean isStarted = false;
 
-    Game() {
+    Game(long owner) {
+        this.owner = owner;
         initializeBoard();
     }
 
@@ -107,7 +108,4 @@ public class Game {
         return owner;
     }
 
-    public void setOwner(long owner) {
-        this.owner = owner;
-    }
 }

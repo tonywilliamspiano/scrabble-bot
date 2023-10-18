@@ -63,6 +63,10 @@ public class LetterBag {
         return returnLetters;
     }
 
+    public void addLetters(List<Character> letters) {
+        this.letters.addAll(letters);
+    }
+
     public Stack<Character> getLetterBag() {
         return letters;
     }

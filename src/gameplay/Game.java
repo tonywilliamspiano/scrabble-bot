@@ -130,6 +130,10 @@ public class Game {
             result += c + " ";
         }
 
-        return result;
+        return result + "\n\n";
+    }
+
+    public LetterBag getLetterBag() {
+        return letterBag;
     }
 }

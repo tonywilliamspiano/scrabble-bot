@@ -2,7 +2,6 @@ package gameplay;
 
 import dictionary.Dictionary;
 import dictionary.LetterBag;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,7 +102,7 @@ public class User {
     }
 
     private void playTurn(String messageReceived) {
-        if (notMyTurn()) {
+        if (notMyTurn() && !messageReceived.toUpperCase().equals("VALUES")) {
             return;
         }
 

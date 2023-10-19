@@ -99,6 +99,15 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         user.wasNotified();
     }
 
+    private void tellOpponentThatUserJoined(User user, User opponent) {
+        String response;
+        response = "Other player has joined! Your turn: \n\n";
+        user.setStatus(Status.TAKE_TURN);
+        response += opponent.getGameState();
+        sendResponse(opponent.getId(), response);
+        sendMenu(opponent.getId());
+    }
+
     private void notifyOpponentOfHisTurn(User opponent) {
         String response;
         response = "Other player has played! Your turn: \n\n";
@@ -124,23 +133,17 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         sendResponse(opponent.getId(), response);
     }
 
-    private void tellOpponentThatUserJoined(User user, User opponent) {
-        String response;
-        response = "Other player has joined! Your turn: \n\n";
-        user.setStatus(Status.TAKE_TURN);
-        response += opponent.getGameState();
-        sendResponse(opponent.getId(), response);
-        sendMenu(opponent.getId());
-    }
-
     private String gameOverMessage(User user) {
+        // Find game and players
         Game game = user.getGame();
         Player p1 = user.getGame().getPlayerOne();
         Player p2 = user.getGame().getPlayerTwo();
         String result = "Game over, the final score is... \n\n";
 
+        // Add score
         result += game.getScore() + "\n";
 
+        // determine winner of game with party emojis
         if (p1.getScore() > p2.getScore()) {
             result += p1.getName() + " wins! \uD83C\uDF89\uD83C\uDF89\uD83C\uDF89";
         } else if (p2.getScore() > p1.getScore()) {
@@ -148,7 +151,6 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         } else {
             result += "It's a tie, you both did great!";
         }
-
         return result;
     }
 

@@ -1,4 +1,5 @@
 import dictionary.Dictionary;
+import gameplay.Status;
 import gameplay.User;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -33,7 +34,7 @@ public class ScrabbleBot extends TelegramLongPollingBot {
                 user = users.get(userIndex);
                 user.resetResponse();
                 user.handleCommand(messageReceived, userId);
-//                sendNotificationIfNecessary(user);
+                sendNotificationIfNecessary(user);
             }
             else {
                 user = new User(userId);
@@ -54,11 +55,20 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         }
 
         System.out.println("Sending notification to " + user.getOpponentId());
-        String response = "Other player has played! Your turn: \n\n";
         int userIndex = userExists(user.getOpponentId());
         User opponent = users.get(userIndex);
 
+        String response = "";
+        if (user.getStatus() == Status.JOINED) {
+            response = "Other player has joined! Your turn: \n\n";
+            user.setStatus(Status.TAKE_TURN);
+        }
+        else {
+            response = "Other player has played! Your turn: \n\n";
+        }
+
         response += opponent.getGameState();
+        opponent.addPrompt();
 
         sendResponse(opponent.getId(), response);
         user.wasNotified();

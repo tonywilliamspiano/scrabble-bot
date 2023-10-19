@@ -21,6 +21,7 @@ public class Game {
     private final char SEPARATOR = '.';
     private boolean isConnected;
     private boolean boardIsEmpty = true;
+    private String scoredWords = "";
 
     public Game(long owner) {
         this.owner = owner;
@@ -169,8 +170,8 @@ public class Game {
             }
             else {
                 fakeBoard[move.getY()][move.getX()] = move.getWord().charAt(i);
+                checkWordsInOtherDirection(move, fakeBoard);
             }
-            checkWordsInOtherDirection(move, fakeBoard);
             move.increment();
         }
 
@@ -189,6 +190,9 @@ public class Game {
         else if (boardIsEmpty && firstMoveInvalid(move)) {
             throw new RuntimeException("First move must intersect H8 square!");
         }
+
+        scoredWords += "Scored word: " + move.getWord() + " for "
+                + Dictionary.scoreWord(move.getWord()) + " points! \uD83C\uDF89\n";
 
         return intersectedLetters;
     }
@@ -285,7 +289,9 @@ public class Game {
         }
         else if (word.length() > 1) {
             isConnected = true;
-            tempScore += Dictionary.scoreWord(word);
+            int score = Dictionary.scoreWord(word);
+            tempScore += score;
+            scoredWords += "Scored word: " + word + " for " + score + " points! \uD83C\uDF89\n";
         }
     }
 
@@ -313,7 +319,9 @@ public class Game {
         }
         else if (word.length() > 1) {
             isConnected = true;
-            tempScore += Dictionary.scoreWord(word);
+            int score = Dictionary.scoreWord(word);
+            tempScore += score;
+            scoredWords += "Scored word: " + word + " for " + score + " points! \uD83C\uDF89\n";
         }
     }
 
@@ -323,5 +331,13 @@ public class Game {
 
     public void setBoardIsEmpty(boolean boardIsEmpty) {
         this.boardIsEmpty = boardIsEmpty;
+    }
+
+    public String getScoredWords() {
+        return scoredWords + "\n";
+    }
+
+    public void clearScoredWords() {
+        scoredWords = "";
     }
 }

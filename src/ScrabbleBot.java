@@ -15,7 +15,6 @@ public class ScrabbleBot extends TelegramLongPollingBot {
     Dictionary dictionary;
     long userId;
     String messageReceived;
-    long chatId;
 
     ScrabbleBot() throws FileNotFoundException {
         this.dictionary = new Dictionary();
@@ -24,41 +23,52 @@ public class ScrabbleBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            if (update.hasMessage()) {
-                messageReceived = update.getMessage().getText();
-                userId = update.getMessage().getFrom().getId();
-            }
-            else if (update.hasCallbackQuery()) {
-                messageReceived = update.getCallbackQuery().getData();
-                userId = update.getCallbackQuery().getMessage().getChatId();
-            }
-            else {
-                return;
-            }
-
-            int userIndex = userExists(userId);
-            User user;
-            // If user exists, let him process the request
-            if (userIndex >= 0) {
-                user = users.get(userIndex);
-                user.resetResponse();
-                user.handleCommand(messageReceived, userId);
-                sendNotificationIfNecessary(user);
-            } else {
-                user = new User(userId);
-                users.add(user);
-                user.welcome();
-            }
-            sendResponse(userId, user.getResponse());
-            if (user.getStatus() == Status.TAKE_TURN && user.isMyTurn()
-                    && user.getGame().isReady()) {
-                sendMenu(userId);
-            } else if (user.getStatus() == Status.UNINITIALIZED){
-                sendTitleMenu(user.getId());
-            }
+            getMessageAndId(update);
+            User user = generateUser();
+            sendResponsesToUser(user);
         } catch (Exception e) {
             sendResponse(userId, "Something went wrong in the backend :( Try again later");
             System.out.println("Exception caught! " + e.getMessage());
+        }
+    }
+
+    private User generateUser() {
+        int userIndex = userExists(userId);
+        User user;
+
+        // If user exists, let him process the request
+        if (userIndex >= 0) {
+            user = users.get(userIndex);
+            user.resetResponse();
+            user.handleCommand(messageReceived, userId);
+        } else {
+            // create a new user
+            user = new User(userId);
+            users.add(user);
+            user.welcome();
+        }
+        return user;
+    }
+    private void sendResponsesToUser(User user) {
+        sendResponse(userId, user.getResponse());
+        sendNotificationIfNecessary(user);
+
+        if (user.getStatus() == Status.TAKE_TURN && user.isMyTurn()
+                && user.getGame().isReady()) {
+            sendMenu(userId);
+        } else if (user.getStatus() == Status.UNINITIALIZED){
+            sendTitleMenu(user.getId());
+        }
+    }
+
+    private void getMessageAndId(Update update) {
+        if (update.hasMessage()) {
+            messageReceived = update.getMessage().getText();
+            userId = update.getMessage().getFrom().getId();
+        }
+        else if (update.hasCallbackQuery()) {
+            messageReceived = update.getCallbackQuery().getData();
+            userId = update.getCallbackQuery().getMessage().getChatId();
         }
     }
 
@@ -66,40 +76,61 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         if (!user.isReadyToNotify()) {
             return;
         }
+        else {
+            sendNotificationToUser(user);
+        }
+    }
 
-        System.out.println("Sending notification to " + user.getOpponentId());
+    private void sendNotificationToUser(User user) {
+        // Find the user's opponent to send him/her a notification
         int userIndex = userExists(user.getOpponentId());
         User opponent = users.get(userIndex);
 
         String response = "";
         if (user.getStatus() == Status.JOINED) {
-            response = "Other player has joined! Your turn: \n\n";
-            user.setStatus(Status.TAKE_TURN);
-            response += opponent.getGameState();
+            tellOpponentThatUserJoined(user, opponent);
         } else if (user.sendGameOverMessage == true) {
-            response += gameOverMessage(user);
-            users.remove(user);
-            user.resetResponse();
-            sendResponse(user.getId(), response);
-
-            users.remove(opponent);
-            sendResponse(opponent.getId(), response);
-            return;
+            endAndRestartGame(user, response, opponent);
         } else if (user.getGame().isEnded()) {
-            System.out.println("Sending notification to opponent" + opponent.getId());
-            sendResponse(opponent.getId(), "Game was ended by opponent... They must be scared to lose!");
-            opponent.setStatus(Status.UNINITIALIZED);
-            sendTitleMenu(opponent.getId());
-            return;
+            tellOpponentThatUserExited(opponent);
+        } else {
+            notifyOpponentOfHisTurn(opponent);
         }
-        else {
-            response = "Other player has played! Your turn: \n\n";
-            response += opponent.getGameState();
-        }
+        user.wasNotified();
+    }
 
+    private void notifyOpponentOfHisTurn(User opponent) {
+        String response;
+        response = "Other player has played! Your turn: \n\n";
+        response += opponent.getGameState();
+        sendLetterKeyboard(userId);
+        sendMenu(opponent.getId());
+    }
+
+    private void tellOpponentThatUserExited(User opponent) {
+        System.out.println("Sending notification to opponent" + opponent.getId());
+        sendResponse(opponent.getId(), "Game was ended by opponent... They must be scared to lose!");
+        opponent.setStatus(Status.UNINITIALIZED);
+        sendTitleMenu(opponent.getId());
+    }
+
+    private void endAndRestartGame(User user, String response, User opponent) {
+        response += gameOverMessage(user);
+        users.remove(user);
+        user.resetResponse();
+        sendResponse(user.getId(), response);
+
+        users.remove(opponent);
+        sendResponse(opponent.getId(), response);
+    }
+
+    private void tellOpponentThatUserJoined(User user, User opponent) {
+        String response;
+        response = "Other player has joined! Your turn: \n\n";
+        user.setStatus(Status.TAKE_TURN);
+        response += opponent.getGameState();
         sendResponse(opponent.getId(), response);
         sendMenu(opponent.getId());
-        user.wasNotified();
     }
 
     private String gameOverMessage(User user) {
@@ -174,6 +205,20 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         message.setText("Enter start or join: ");
         message.setChatId(userId);
         message.setReplyMarkup(KeyboardFactory.getFirstKeyboard());
+        message.setParseMode("Markdown");
+        try {
+            execute(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendLetterKeyboard(long userId) {
+        SendMessage message = new SendMessage();
+
+        message.setText("You can still see letter values, if you want:");
+        message.setChatId(userId);
+        message.setReplyMarkup(KeyboardFactory.getLetterKeyboard());
         message.setParseMode("Markdown");
         try {
             execute(message);

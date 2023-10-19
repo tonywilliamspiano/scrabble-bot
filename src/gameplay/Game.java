@@ -143,26 +143,16 @@ public class Game {
         tempScore = 0;
 
         Board fakeBoard = board2.clone();
+        intersectedLetters = fakeBoard.getIntersectingLetters(move);
+        System.out.println(intersectedLetters);
 
-        checkForIllegalLongerWord(move);
+        fakeBoard = board2.clone();
+        fakeBoard.checkForIllegalLongerWord(move);
+        fakeBoard.checkWordsInOtherDirection(move);
 
-        for (int i = 0; i < move.getWord().length(); i++) {
-            int x = move.getX();
-            int y = move.getY();
-            if (fakeBoard.get(y, x) != SEPARATOR) {
-                if (fakeBoard.get(y, x) != move.getWord().charAt(i)) {
-                    throw new RuntimeException("Invalid word!");
-                }
-                else {
-                    intersectedLetters.add(fakeBoard.get(y, x));
-                }
-            }
-            else {
-                fakeBoard.set(y, x, move.getWord().charAt(i));
-                checkWordsInOtherDirection(move, fakeBoard);
-            }
-            move.increment();
-        }
+        tempScore = fakeBoard.getTempScore();
+        scoredWords = fakeBoard.getScoredWords();
+        isConnected = fakeBoard.isConnected;
 
         move.setX(oldX);
         move.setY(oldY);
@@ -202,104 +192,6 @@ public class Game {
         move.setX(oldX);
         move.setY(oldY);
         return true;
-    }
-
-
-    private void checkForIllegalLongerWord(Move move) {
-        int x = move.getX();
-        int y = move.getY();
-        String word = move.getWord();
-
-        if (move.getDirection() == Direction.ACROSS) {
-            // If there are letters left of the start of the word, the move is invalid.
-            if (move.getX() > 0 && board2.get(y, x) != SEPARATOR) {
-                throw new RuntimeException("Word invalid!");
-            }
-            // If there are letters right of the end of the word, the move is invalid.
-            if (x + word.length() < HEIGHT - 1 && board2.get(y, x + word.length() + 1) != SEPARATOR) {
-                throw new RuntimeException("Word invalid!");
-            }
-        }
-        else {
-            //Same logic for words going up and down
-            if (y > 0 && board2.get(y - 1, x) != SEPARATOR) {
-                throw new RuntimeException("Word invalid!");
-            }
-            // If there are letters below the end of the word, the move is invalid.
-            if (y + word.length() < HEIGHT - 1 && board2.get(y + word.length() + 1, x) != SEPARATOR) {
-                throw new RuntimeException("Word invalid!");
-            }
-        }
-
-    }
-
-    private void checkWordsInOtherDirection(Move move, Board fakeBoard) {
-        if (move.getDirection() == Direction.ACROSS) {
-            checkUpAndDown(move, fakeBoard);
-        }
-        else {
-            checkLeftAndRight(move, fakeBoard);
-        }
-    }
-
-    private void checkUpAndDown(Move move, Board fakeBoard) {
-        int y = move.getY();
-        int x = move.getX();
-        String word = "";
-
-        // Go to top of word
-        while (y > 0 && fakeBoard.get(y, x) != SEPARATOR) {
-            y--;
-        }
-        if (fakeBoard.get(y, x) == SEPARATOR) {
-            y++;
-        }
-
-        // Read word into string
-        while (y < HEIGHT && fakeBoard.get(y, x) != SEPARATOR) {
-            word += fakeBoard.get(y, x);
-            y++;
-        }
-
-        if (word.length() > 1 && !Dictionary.isValidWord(word)) {
-            throw new RuntimeException("Invalid word: " + word);
-        }
-        else if (word.length() > 1) {
-            isConnected = true;
-            int score = Dictionary.scoreWord(word);
-            tempScore += score;
-            scoredWords += "Scored word: " + word + " for " + score + " points! \uD83C\uDF89\n";
-        }
-    }
-
-    private void checkLeftAndRight(Move move, Board fakeBoard) {
-        int y = move.getY();
-        int x = move.getX();
-        String word = "";
-
-        // Go to top of word
-        while (x > 0 && fakeBoard.get(y, x) != SEPARATOR) {
-            x--;
-        }
-        if (fakeBoard.get(y, x) == SEPARATOR) {
-            x++;
-        }
-
-        // Read word into string
-        while (x < HEIGHT && fakeBoard.get(y, x) != SEPARATOR) {
-            word += fakeBoard.get(y, x);
-            x++;
-        }
-
-        if (word.length() > 1 && !Dictionary.isValidWord(word)) {
-            throw new RuntimeException("Invalid word: " + word);
-        }
-        else if (word.length() > 1) {
-            isConnected = true;
-            int score = Dictionary.scoreWord(word);
-            tempScore += score;
-            scoredWords += "Scored word: " + word + " for " + score + " points! \uD83C\uDF89\n";
-        }
     }
 
     public int getTempScore() {

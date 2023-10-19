@@ -15,7 +15,7 @@ public class KeyboardFactory {
         // Create 'play' button
         InlineKeyboardButton playButton = new InlineKeyboardButton();
         playButton.setText("Play");
-        playButton.setCallbackData("play"); // This data will be sent to your bot when the button is clicked
+        playButton.setCallbackData("play");
         row.add(playButton);
 
         // Create 'swap' button
@@ -58,7 +58,7 @@ public class KeyboardFactory {
         // Create 'start' button
         InlineKeyboardButton startButton = new InlineKeyboardButton();
         startButton.setText("start");
-        startButton.setCallbackData("start"); // This data will be sent to your bot when the button is clicked
+        startButton.setCallbackData("start");
         row.add(startButton);
 
         // Create 'join' button

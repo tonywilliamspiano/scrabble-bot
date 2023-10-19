@@ -1,0 +1,12 @@
+
+THURSDAY GOALS
+
+1. Let exit happen at any time.
+
+4. Merciless refactoring to separate modules better and add tests
+    - User class is way too big, probably need a marshaler for all the switches
+    - Word checker class which takes board and move and throws the exceptions
+
+
+// For later:
+- Save game states in files serialized by user IDs.

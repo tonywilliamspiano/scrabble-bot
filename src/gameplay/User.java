@@ -247,6 +247,7 @@ public class User {
 
         handLetters.addAll(myPlayer.getHand());
         handLetters.addAll(game.getIntersectingLetters(move));
+        System.out.println(handLetters);
 
         for (int i = 0; i < move.getWord().length(); i++) {
             wordLetters.add(move.getWord().charAt(i));

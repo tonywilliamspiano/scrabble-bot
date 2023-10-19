@@ -11,7 +11,6 @@ public class Game {
     public static final int WIDTH = 15;
     public static final int HEIGHT = 15;
     private Board board2 = new Board();
-    private char[][] board = new char[HEIGHT][WIDTH];
     private boolean boardIsEmpty = true;
 
     private final char SEPARATOR = '.';
@@ -160,7 +159,7 @@ public class Game {
             }
             else {
                 fakeBoard.set(y, x, move.getWord().charAt(i));
-                checkWordsInOtherDirection(move, fakeBoard.getBoard());
+                checkWordsInOtherDirection(move, fakeBoard);
             }
             move.increment();
         }
@@ -207,35 +206,34 @@ public class Game {
 
 
     private void checkForIllegalLongerWord(Move move) {
-        board = board2.getBoard();
+        int x = move.getX();
+        int y = move.getY();
+        String word = move.getWord();
+
         if (move.getDirection() == Direction.ACROSS) {
             // If there are letters left of the start of the word, the move is invalid.
-            if (move.getX() > 0 && board[move.getY()][move.getX() - 1] != SEPARATOR) {
+            if (move.getX() > 0 && board2.get(y, x) != SEPARATOR) {
                 throw new RuntimeException("Word invalid!");
             }
             // If there are letters right of the end of the word, the move is invalid.
-            if (move.getX() + move.getWord().length() < HEIGHT - 1 &&
-                    board[move.getY()][move.getX() + move.getWord().length() + 1] != SEPARATOR)
-            {
+            if (x + word.length() < HEIGHT - 1 && board2.get(y, x + word.length() + 1) != SEPARATOR) {
                 throw new RuntimeException("Word invalid!");
             }
         }
         else {
             //Same logic for words going up and down
-            if (move.getY() > 0 && board[move.getY() - 1][move.getX()] != SEPARATOR) {
+            if (y > 0 && board2.get(y - 1, x) != SEPARATOR) {
                 throw new RuntimeException("Word invalid!");
             }
             // If there are letters below the end of the word, the move is invalid.
-            if (move.getY() + move.getWord().length() < HEIGHT - 1 &&
-                    board[move.getY() + move.getWord().length() + 1][move.getX()] != SEPARATOR)
-            {
+            if (y + word.length() < HEIGHT - 1 && board2.get(y + word.length() + 1, x) != SEPARATOR) {
                 throw new RuntimeException("Word invalid!");
             }
         }
 
     }
 
-    private void checkWordsInOtherDirection(Move move, char[][] fakeBoard) {
+    private void checkWordsInOtherDirection(Move move, Board fakeBoard) {
         if (move.getDirection() == Direction.ACROSS) {
             checkUpAndDown(move, fakeBoard);
         }
@@ -244,22 +242,22 @@ public class Game {
         }
     }
 
-    private void checkUpAndDown(Move move, char[][] fakeBoard) {
+    private void checkUpAndDown(Move move, Board fakeBoard) {
         int y = move.getY();
         int x = move.getX();
         String word = "";
 
         // Go to top of word
-        while (y > 0 && fakeBoard[y][x] != SEPARATOR) {
+        while (y > 0 && fakeBoard.get(y, x) != SEPARATOR) {
             y--;
         }
-        if (fakeBoard[y][x] == SEPARATOR) {
+        if (fakeBoard.get(y, x) == SEPARATOR) {
             y++;
         }
 
         // Read word into string
-        while (y < HEIGHT && fakeBoard[y][x] != SEPARATOR) {
-            word += fakeBoard[y][x];
+        while (y < HEIGHT && fakeBoard.get(y, x) != SEPARATOR) {
+            word += fakeBoard.get(y, x);
             y++;
         }
 
@@ -274,22 +272,22 @@ public class Game {
         }
     }
 
-    private void checkLeftAndRight(Move move, char[][] fakeBoard) {
+    private void checkLeftAndRight(Move move, Board fakeBoard) {
         int y = move.getY();
         int x = move.getX();
         String word = "";
 
         // Go to top of word
-        while (x > 0 && fakeBoard[y][x] != SEPARATOR) {
+        while (x > 0 && fakeBoard.get(y, x) != SEPARATOR) {
             x--;
         }
-        if (fakeBoard[y][x] == SEPARATOR) {
+        if (fakeBoard.get(y, x) == SEPARATOR) {
             x++;
         }
 
         // Read word into string
-        while (x < HEIGHT && fakeBoard[y][x] != SEPARATOR) {
-            word += fakeBoard[y][x];
+        while (x < HEIGHT && fakeBoard.get(y, x) != SEPARATOR) {
+            word += fakeBoard.get(y, x);
             x++;
         }
 

@@ -10,18 +10,20 @@ import java.util.Collection;
 public class Game {
     public static final int WIDTH = 15;
     public static final int HEIGHT = 15;
+    private Board board2 = new Board();
+    private char[][] board = new char[HEIGHT][WIDTH];
+    private boolean boardIsEmpty = true;
+
+    private final char SEPARATOR = '.';
     private long owner;
     private LetterBag letterBag = new LetterBag();
     private Player playerOne = new Player("");
     private Player playerTwo = new Player("");
-    private char[][] board = new char[HEIGHT][WIDTH];
     private boolean isStarted = false;
     private boolean readyToPlay;
     private Turn turn;
     private int tempScore;
-    private final char SEPARATOR = '.';
     private boolean isConnected;
-    private boolean boardIsEmpty = true;
     private String scoredWords = "";
     private boolean isEnded = false;
     private TurnType lastTurn = TurnType.NONE;
@@ -29,45 +31,15 @@ public class Game {
 
     public Game(long owner) {
         this.owner = owner;
-        initializeBoard();
+        board2.initialize();
         turn = Turn.ONE;
-    }
-
-    private void initializeBoard() {
-        for (int i = 0; i < HEIGHT; i++) {
-            for (int j = 0; j < WIDTH; j++) {
-                board[i][j] = SEPARATOR;
-            }
-        }
-    }
-
-    public String boardAsString() {
-        String result = "```   ";
-
-        for (char row = 'A'; row < 'A' + WIDTH; row++) {
-            result += row + " ";
-        }
-        result += "\n";
-
-        for (int i = 0; i < HEIGHT; i++) {
-            result += (i + 1) + " ";
-            if (i < 9) {
-                result += " ";
-            }
-
-            for (int j = 0; j < WIDTH; j++) {
-                result += board[i][j] + " ";
-            }
-            result += "\n";
-        }
-        result += "```\n\n";
-        return result;
     }
 
     public String getScore() {
         return playerOne.getName() + " : " + playerOne.getScore() + "\n"
                 + playerTwo.getName() + " : " + playerTwo.getScore() + "\n\n";
     }
+
     public void addPlayer(Player player) {
         // Make sure no empty names get inputted
         if (player.getName().isEmpty()) {
@@ -101,8 +73,10 @@ public class Game {
 
     public void addWord(Move move) {
         for (int i = 0; i < move.getWord().length(); i++) {
-            if (board[move.getY()][move.getX()] == SEPARATOR) {
-                board[move.getY()][move.getX()] = move.getWord().charAt(i);
+            int x = move.getX();
+            int y = move.getY();
+            if (board2.get(y, x) == board2.SEPARATOR) {
+                board2.set(y, x, move.getWord().charAt(i));
             }
             move.increment();
         }
@@ -169,22 +143,24 @@ public class Game {
         isConnected = false;
         tempScore = 0;
 
-        char[][] fakeBoard = makeCopyOfBoard();
+        Board fakeBoard = board2.clone();
 
         checkForIllegalLongerWord(move);
 
         for (int i = 0; i < move.getWord().length(); i++) {
-            if (board[move.getY()][move.getX()] != SEPARATOR) {
-                if (board[move.getY()][move.getX()] != move.getWord().charAt(i)) {
+            int x = move.getX();
+            int y = move.getY();
+            if (fakeBoard.get(y, x) != SEPARATOR) {
+                if (fakeBoard.get(y, x) != move.getWord().charAt(i)) {
                     throw new RuntimeException("Invalid word!");
                 }
                 else {
-                    intersectedLetters.add(board[move.getY()][move.getX()]);
+                    intersectedLetters.add(fakeBoard.get(y, x));
                 }
             }
             else {
-                fakeBoard[move.getY()][move.getX()] = move.getWord().charAt(i);
-                checkWordsInOtherDirection(move, fakeBoard);
+                fakeBoard.set(y, x, move.getWord().charAt(i));
+                checkWordsInOtherDirection(move, fakeBoard.getBoard());
             }
             move.increment();
         }
@@ -230,18 +206,8 @@ public class Game {
     }
 
 
-    private char[][] makeCopyOfBoard() {
-        char fakeBoard[][] = new char[HEIGHT][WIDTH];
-
-        for (int i = 0; i < HEIGHT; i++) {
-            for (int j = 0; j < WIDTH; j++) {
-                fakeBoard[i][j] = board[i][j];
-            }
-        }
-        return fakeBoard;
-    }
-
     private void checkForIllegalLongerWord(Move move) {
+        board = board2.getBoard();
         if (move.getDirection() == Direction.ACROSS) {
             // If there are letters left of the start of the word, the move is invalid.
             if (move.getX() > 0 && board[move.getY()][move.getX() - 1] != SEPARATOR) {
@@ -368,5 +334,9 @@ public class Game {
 
     public TurnType getLastTurn() {
         return lastTurn;
+    }
+
+    public String boardAsString() {
+        return board2.toString();
     }
 }

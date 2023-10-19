@@ -10,9 +10,8 @@ import java.util.Collection;
 public class Game {
     public static final int WIDTH = 15;
     public static final int HEIGHT = 15;
-    private Board board2 = new Board();
+    private Board board = new Board();
     private boolean boardIsEmpty = true;
-
     private final char SEPARATOR = '.';
     private long owner;
     private LetterBag letterBag = new LetterBag();
@@ -30,7 +29,7 @@ public class Game {
 
     public Game(long owner) {
         this.owner = owner;
-        board2.initialize();
+        board.initialize();
         turn = Turn.ONE;
     }
 
@@ -74,8 +73,8 @@ public class Game {
         for (int i = 0; i < move.getWord().length(); i++) {
             int x = move.getX();
             int y = move.getY();
-            if (board2.get(y, x) == board2.SEPARATOR) {
-                board2.set(y, x, move.getWord().charAt(i));
+            if (board.get(y, x) == board.SEPARATOR) {
+                board.set(y, x, move.getWord().charAt(i));
             }
             move.increment();
         }
@@ -142,7 +141,7 @@ public class Game {
         isConnected = false;
         tempScore = 0;
 
-        Board fakeBoard = board2.clone();
+        Board fakeBoard = board.clone();
 
         checkForIllegalLongerWord(move);
 
@@ -212,21 +211,21 @@ public class Game {
 
         if (move.getDirection() == Direction.ACROSS) {
             // If there are letters left of the start of the word, the move is invalid.
-            if (move.getX() > 0 && board2.get(y, x) != SEPARATOR) {
+            if (move.getX() > 0 && board.get(y, x) != SEPARATOR) {
                 throw new RuntimeException("Word invalid!");
             }
             // If there are letters right of the end of the word, the move is invalid.
-            if (x + word.length() < HEIGHT - 1 && board2.get(y, x + word.length() + 1) != SEPARATOR) {
+            if (x + word.length() < HEIGHT - 1 && board.get(y, x + word.length() + 1) != SEPARATOR) {
                 throw new RuntimeException("Word invalid!");
             }
         }
         else {
             //Same logic for words going up and down
-            if (y > 0 && board2.get(y - 1, x) != SEPARATOR) {
+            if (y > 0 && board.get(y - 1, x) != SEPARATOR) {
                 throw new RuntimeException("Word invalid!");
             }
             // If there are letters below the end of the word, the move is invalid.
-            if (y + word.length() < HEIGHT - 1 && board2.get(y + word.length() + 1, x) != SEPARATOR) {
+            if (y + word.length() < HEIGHT - 1 && board.get(y + word.length() + 1, x) != SEPARATOR) {
                 throw new RuntimeException("Word invalid!");
             }
         }
@@ -335,6 +334,6 @@ public class Game {
     }
 
     public String boardAsString() {
-        return board2.toString();
+        return board.toString();
     }
 }

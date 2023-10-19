@@ -47,6 +47,7 @@ public class User {
             case GET_P1_NAME -> addPlayerOne(messageReceived, userId);
             case GET_P2_NAME -> addPlayerTwo(messageReceived, userId);
             case GET_ID -> addIdToGame(messageReceived);
+            case JOINED -> notMyTurn();
             case TAKE_TURN -> playTurn(messageReceived);
             case SWAP -> swap(messageReceived);
             case PASS -> pass();
@@ -118,14 +119,14 @@ public class User {
 
 
     private boolean notMyTurn() {
-//        if (waitingForPlayer()) {
-//            response += "Waiting for other player to join...\n";
-//            return true;
-//        } else if (!isMyTurn()) {
-//            response += "Not your turn! Wait for other player.\n\n";
-//            showGameState();
-//            return true;
-//        }
+        if (waitingForPlayer()) {
+            response += "Waiting for other player to join...\n";
+            return true;
+        } else if (!isMyTurn()) {
+            response += "Not your turn! Wait for other player.\n\n";
+            showGameState();
+            return true;
+        }
         return false;
     }
 
@@ -148,7 +149,7 @@ public class User {
         myPlayer.addToHand(7);
         myPlayer.setUserID(userId);
         response += "You were added to the game!";
-        status = Status.TAKE_TURN;
+        status = Status.JOINED;
         myTurn = Turn.TWO;
     }
 
@@ -188,7 +189,6 @@ public class User {
     }
 
     private boolean waitingForPlayer() {
-        System.out.println(game.isReady());
         if (game.isReady()) {
             return false;
         } else {
@@ -201,44 +201,44 @@ public class User {
     }
 
     public void playWord(String messageReceived) {
-        Move move = MoveParser.parseMove(messageReceived);
-        if (Dictionary.isValidWord(move.getWord()) == false) {
-            response += "Invalid word! " + move.getWord() + "\n\n";
+        try {
+            Move move = MoveParser.parseMove(messageReceived);
+            checkIfWordIsPlayable(move);
+            game.addWord(move);
+            myPlayer.makeMove(move);
+            myPlayer.addScore(game.getTempScore());
+            game.setBoardIsEmpty(false);
+            response += game.getScoredWords();
+            showGameState();
+            endTurn();
+            game.clearScoredWords();
+        } catch (Exception e) {
+            game.clearScoredWords();
+            response += EXCLAMATION + e.getMessage() + EXCLAMATION + "\n\n";
+            showGameState();
+            addPrompt();
+            status = Status.TAKE_TURN;
         }
-        else {
-            try {
-                checkIfWordIsPlayable(move);
-                game.addWord(move);
-                myPlayer.makeMove(move);
-                myPlayer.addScore(game.getTempScore());
-                game.setBoardIsEmpty(false);
-                endTurn();
-            }
-            catch (Exception e) {
-                System.out.println("Caught exception");
-                response += EXCLAMATION + e.getMessage() + EXCLAMATION + "\n\n";
-                addPrompt();
-                status = Status.TAKE_TURN;
-            }
-        }
-
-        showGameState();
     }
 
     private void endTurn() {
-        response += "Turn is over, wait for notification from opponent\n\n";
         game.switchTurn();
         readyToNotify = true;
         status = Status.TAKE_TURN;
+        response += "Turn is over, wait for notification from opponent\n\n";
     }
 
-    private void addPrompt() {
+    public void addPrompt() {
         response += "Enter **SWAP**, **PASS** or **PLAY**\n\n";
     }
 
     private void checkIfWordIsPlayable(Move move) {
         List<Character> handLetters = new ArrayList<>();
         List<Character> wordLetters = new ArrayList<>();
+
+        if (Dictionary.isValidWord(move.getWord()) == false) {
+            throw new RuntimeException("Word invalid: " + move.getWord());
+        }
 
         handLetters.addAll(myPlayer.getHand());
         handLetters.addAll(game.getIntersectingLetters(move));
@@ -282,5 +282,12 @@ public class User {
         } else {
             return game.getPlayerOne().getUserID();
         }
+    }
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

@@ -9,5 +9,6 @@ public enum Status {
 	TAKE_TURN,
     SWAP,
     PASS,
-    PLAY_WORD
+    PLAY_WORD,
+    JOINED
 }

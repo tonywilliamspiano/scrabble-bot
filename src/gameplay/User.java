@@ -9,31 +9,16 @@ public class User {
     private static final String EXCLAMATION = "❗";
     private final long userId;
     private Game game;
-    private Turn myTurn;
     private Player myPlayer;
+    private Turn myTurn;
     private boolean readyToNotify = false;
     public boolean sendGameOverMessage = false;
-
-    String response = "";
+    private String response = "";
     private Status status = Status.UNINITIALIZED;
-
 
     public User(long userId) {
         this.userId = userId;
         this.game = new Game(userId);
-    }
-
-    public long getId() {
-        return userId;
-    }
-
-
-    public void resetResponse() {
-        response = "";
-    }
-
-    public String getResponse() {
-        return response;
     }
 
     public void handleCommand(String messageReceived, long userId) {
@@ -208,7 +193,7 @@ public class User {
     }
 
     private boolean waitingForPlayer() {
-        if (game.isReady()) {
+        if (game.isReadyToPlay()) {
             return false;
         } else {
             return true;
@@ -317,5 +302,19 @@ public class User {
 
     public void welcome() {
         response += "Welcome to scrabble bot!\n";
+    }
+
+
+    public long getId() {
+        return userId;
+    }
+
+
+    public void resetResponse() {
+        response = "";
+    }
+
+    public String getResponse() {
+        return response;
     }
 }

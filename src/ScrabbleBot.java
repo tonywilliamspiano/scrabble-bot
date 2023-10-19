@@ -54,7 +54,7 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         sendNotificationIfNecessary(user);
 
         if (user.getStatus() == Status.TAKE_TURN && user.isMyTurn()
-                && user.getGame().isReady()) {
+                && user.getGame().isReadyToPlay()) {
             sendMenu(userId);
         } else if (user.getStatus() == Status.UNINITIALIZED){
             sendTitleMenu(user.getId());

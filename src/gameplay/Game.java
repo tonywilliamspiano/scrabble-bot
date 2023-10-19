@@ -16,8 +16,8 @@ public class Game {
     private Player playerTwo = new Player("");
     private char[][] board = new char[HEIGHT][WIDTH];
     private boolean isStarted = false;
+    private boolean readyToPlay;
     private Turn turn;
-    private boolean isReady;
     private int tempScore;
     private final char SEPARATOR = '.';
     private boolean isConnected;
@@ -82,7 +82,7 @@ public class Game {
         else if (playerTwo.getName().isEmpty()) {
             this.playerTwo = player;
             System.out.println("set player 2 to " + playerTwo.getName() + " " + playerTwo.getUserID());
-            isReady = true;
+            readyToPlay = true;
         }
         else {
             throw new RuntimeException("Game already has two players!");
@@ -134,8 +134,8 @@ public class Game {
         }
     }
 
-    public boolean isReady() {
-        return isReady;
+    public boolean isReadyToPlay() {
+        return readyToPlay;
     }
 
     public String showPlayerHand(Player player) {

@@ -10,7 +10,6 @@ import java.util.List;
 public class Dictionary {
 
     private static List<String> words = new ArrayList<>();
-    private static int dictionarySize;
     private LetterValues letterValues = new LetterValues();
 
     public Dictionary() throws FileNotFoundException {
@@ -55,7 +54,6 @@ public class Dictionary {
             wordScore += LetterValues.get(word.charAt(i));
         }
 
-        System.out.println("Scored word: " + word + " for " + wordScore + " points!");
         return wordScore;
     }
 }

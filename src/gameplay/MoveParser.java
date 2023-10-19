@@ -23,6 +23,11 @@ public class MoveParser {
             throw new RuntimeException("Couldn't parse move, double check your formatting");
         }
 
+        if (x > Game.WIDTH || y > Game.HEIGHT
+                || x < 0 || y < 0) {
+            throw new RuntimeException("Couldn't parse move, double check your formatting");
+        }
+
         // Fourth part direction
         Direction d;
 

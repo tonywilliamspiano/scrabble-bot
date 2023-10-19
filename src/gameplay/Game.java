@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class Game {
-    private static final int WIDTH = 15;
-    private static final int HEIGHT = 15;
+    public static final int WIDTH = 15;
+    public static final int HEIGHT = 15;
     private long owner;
     private LetterBag letterBag = new LetterBag();
     private Player playerOne = new Player("");
@@ -247,7 +247,7 @@ public class Game {
                 throw new RuntimeException("Word invalid!");
             }
             // If there are letters below the end of the word, the move is invalid.
-            if (move.getX() + move.getWord().length() < HEIGHT - 1 &&
+            if (move.getY() + move.getWord().length() < HEIGHT - 1 &&
                     board[move.getY() + move.getWord().length() + 1][move.getX()] != SEPARATOR)
             {
                 throw new RuntimeException("Word invalid!");
@@ -285,7 +285,7 @@ public class Game {
         }
 
         if (word.length() > 1 && !Dictionary.isValidWord(word)) {
-            throw new RuntimeException("Invalid word");
+            throw new RuntimeException("Invalid word: " + word);
         }
         else if (word.length() > 1) {
             isConnected = true;
@@ -315,7 +315,7 @@ public class Game {
         }
 
         if (word.length() > 1 && !Dictionary.isValidWord(word)) {
-            throw new RuntimeException("Invalid word");
+            throw new RuntimeException("Invalid word: " + word);
         }
         else if (word.length() > 1) {
             isConnected = true;

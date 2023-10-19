@@ -39,7 +39,6 @@ public class User {
         return response;
     }
 
-    // Todo change this into a switch statement based on gameplay.Status.
     public void handleCommand(String messageReceived, long userId) {
         switch (status) {
             case UNINITIALIZED -> handleInitialization(messageReceived);
@@ -69,7 +68,6 @@ public class User {
             if (!handCopy.contains(c)) {
                 response += "Swap failed, some letters weren't found\n\n";
                 status = Status.TAKE_TURN;
-                addPrompt();
                 return;
             }
             removedLetters.add(c);
@@ -113,7 +111,6 @@ public class User {
             case SWAP -> response += "Enter tiles to swap, with no separation, like this: ABCD";
             case PLAY_WORD -> response += "Enter your word and its coordinates / direction (across or down), like this: Word h6 down";
             case PASS -> pass();
-            default -> addPrompt();
         }
     }
 
@@ -137,13 +134,11 @@ public class User {
             GameLibrary.add(messageReceived, game);
             response += "Game created with passcode: " + messageReceived + "\n\n";
             showGameState();
-            addPrompt();
             status = Status.TAKE_TURN;
         }
     }
 
     private void addPlayerTwo(String messageReceived, long userId) {
-        // Todo add empty string check here.
         myPlayer = new Player(messageReceived);
         game.addPlayer(myPlayer);
         myPlayer.addToHand(7);
@@ -154,7 +149,6 @@ public class User {
     }
 
     private void addPlayerOne(String messageReceived, long userId) {
-        // Todo add empty string check here.
         myPlayer = new Player(messageReceived);
         game.addPlayer(myPlayer);
         myPlayer.addToHand(7);
@@ -196,7 +190,7 @@ public class User {
         }
     }
 
-    private boolean isMyTurn() {
+    public boolean isMyTurn() {
         return game.whoseTurn() == myTurn;
     }
 
@@ -212,11 +206,15 @@ public class User {
             showGameState();
             endTurn();
             game.clearScoredWords();
+        } catch (ArrayIndexOutOfBoundsException e) {
+            game.clearScoredWords();
+            response += EXCLAMATION + "Out of bounds..." + EXCLAMATION + "\n\n";
+            showGameState();
+            status = Status.TAKE_TURN;
         } catch (Exception e) {
             game.clearScoredWords();
             response += EXCLAMATION + e.getMessage() + EXCLAMATION + "\n\n";
             showGameState();
-            addPrompt();
             status = Status.TAKE_TURN;
         }
     }
@@ -226,10 +224,6 @@ public class User {
         readyToNotify = true;
         status = Status.TAKE_TURN;
         response += "Turn is over, wait for notification from opponent\n\n";
-    }
-
-    public void addPrompt() {
-        response += "Enter **SWAP**, **PASS** or **PLAY**\n\n";
     }
 
     private void checkIfWordIsPlayable(Move move) {

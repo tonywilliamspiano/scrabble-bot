@@ -21,11 +21,21 @@ public class ScrabbleBot extends TelegramLongPollingBot {
     ScrabbleBot() throws FileNotFoundException {
         this.dictionary = new Dictionary();
     }
+
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            messageReceived = update.getMessage().getText();
-            userId = update.getMessage().getFrom().getId();
+            if (update.hasMessage()) {
+                messageReceived = update.getMessage().getText();
+                userId = update.getMessage().getFrom().getId();
+            }
+            else if (update.hasCallbackQuery()) {
+                messageReceived = update.getCallbackQuery().getData();
+                userId = update.getCallbackQuery().getMessage().getChatId();
+            }
+            else {
+                return;
+            }
 
             int userIndex = userExists(userId);
             User user;
@@ -35,15 +45,16 @@ public class ScrabbleBot extends TelegramLongPollingBot {
                 user.resetResponse();
                 user.handleCommand(messageReceived, userId);
                 sendNotificationIfNecessary(user);
-            }
-            else {
+            } else {
                 user = new User(userId);
                 users.add(user);
                 user.welcome();
             }
             sendResponse(userId, user.getResponse());
-        }
-        catch (Exception e) {
+            if (user.getStatus() == Status.TAKE_TURN && user.isMyTurn()) {
+                sendMenu(userId);
+            }
+        } catch (Exception e) {
             sendResponse(userId, "Something went wrong in the backend :( Try again later");
             System.out.println("Exception caught! " + e.getMessage());
         }
@@ -62,15 +73,14 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         if (user.getStatus() == Status.JOINED) {
             response = "Other player has joined! Your turn: \n\n";
             user.setStatus(Status.TAKE_TURN);
-        }
-        else {
+        } else {
             response = "Other player has played! Your turn: \n\n";
         }
 
         response += opponent.getGameState();
-        opponent.addPrompt();
 
         sendResponse(opponent.getId(), response);
+        sendMenu(opponent.getId());
         user.wasNotified();
     }
 
@@ -104,5 +114,22 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+
+    private void sendMenu(long userId) {
+        SendMessage message = new SendMessage();
+
+        message.setText("Enter play, swap, or pass:");
+        message.setChatId(userId);
+        message.setReplyMarkup(KeyboardFactory.getMenuKeyboard());
+        message.setParseMode("Markdown");
+        try {
+            execute(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Sent menu to user!");
     }
 }

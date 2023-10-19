@@ -73,12 +73,8 @@ public class ScrabbleBot extends TelegramLongPollingBot {
     }
 
     private void sendNotificationIfNecessary(User user) {
-        if (!user.isReadyToNotify()) {
-            return;
-        }
-        else {
+        if (user.isReadyToNotify())
             sendNotificationToUser(user);
-        }
     }
 
     private void sendNotificationToUser(User user) {
@@ -112,6 +108,7 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         String response;
         response = "Other player has played! Your turn: \n\n";
         response += opponent.getGameState();
+        sendResponse(opponent.getId(), response);
         sendLetterKeyboard(userId);
         sendMenu(opponent.getId());
     }

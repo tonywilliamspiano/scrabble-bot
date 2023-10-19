@@ -216,7 +216,6 @@ public class Game {
         int oldY = move.getY();
 
         for (int i = 0; i < move.getWord().length(); i++) {
-            System.out.println("X is " + move.getX() + " and Y is " + move.getY());
             if (move.getX() == HEIGHT / 2 && move.getY() == WIDTH / 2) {
                 move.setX(oldX);
                 move.setY(oldY);

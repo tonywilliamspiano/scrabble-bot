@@ -73,4 +73,22 @@ public class KeyboardFactory {
 
         return inlineKeyboard;
     }
+
+    public static InlineKeyboardMarkup getLetterKeyboard() {
+        InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup();
+
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+
+        // Create 'show letter values' button
+        InlineKeyboardButton letterButton = new InlineKeyboardButton();
+        letterButton.setText("Show letter values");
+        letterButton.setCallbackData("values");
+        row.add(letterButton);
+
+        keyboard.add(row);
+        inlineKeyboard.setKeyboard(keyboard);
+
+        return inlineKeyboard;
+    }
 }

@@ -49,15 +49,13 @@ public class LetterBag {
         }
     }
 
-    public Character getLetter() {
-        return letters.pop();
-    }
-
     public List<Character> getLetters(int n) {
         List<Character> returnLetters = new ArrayList<>();
 
         for (int i = 0; i < n; i++) {
-            returnLetters.add(letters.pop());
+            if (!letters.isEmpty()) {
+                returnLetters.add(letters.pop());
+            }
         }
 
         return returnLetters;
@@ -69,5 +67,13 @@ public class LetterBag {
 
     public Stack<Character> getLetterBag() {
         return letters;
+    }
+
+    public boolean isEmpty() {
+        return letters.isEmpty();
+    }
+
+    public Character getLetter() {
+        return letters.pop();
     }
 }

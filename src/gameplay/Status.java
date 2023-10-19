@@ -10,5 +10,7 @@ public enum Status {
     SWAP,
     PASS,
     PLAY_WORD,
-    JOINED
+    JOINED,
+    SHOW_LETTERS,
+    EXITED
 }

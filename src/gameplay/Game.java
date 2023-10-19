@@ -2,6 +2,7 @@ package gameplay;
 
 import dictionary.Dictionary;
 import dictionary.LetterBag;
+import dictionary.LetterValues;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +23,9 @@ public class Game {
     private boolean isConnected;
     private boolean boardIsEmpty = true;
     private String scoredWords = "";
+    private boolean isEnded = false;
+    private TurnType lastTurn = TurnType.NONE;
+
 
     public Game(long owner) {
         this.owner = owner;
@@ -73,11 +77,11 @@ public class Game {
         // Add player to game if game is not full
         if (playerOne.getName().isEmpty()) {
             this.playerOne = player;
-            System.out.println("set player 1 to " + playerOne.getName());
+            System.out.println("set player 1 to " + playerOne.getName() + " " + playerOne.getUserID());
         }
         else if (playerTwo.getName().isEmpty()) {
             this.playerTwo = player;
-            System.out.println("set player 2 to " + playerTwo.getName());
+            System.out.println("set player 2 to " + playerTwo.getName() + " " + playerTwo.getUserID());
             isReady = true;
         }
         else {
@@ -139,6 +143,16 @@ public class Game {
 
         for (Character c : player.getHand()) {
             result += c + " ";
+        }
+
+        return result + "\n\n";
+    }
+
+    public String showPlayerHandWithLetterValues(Player player) {
+        String result = "Your letter values: ";
+
+        for (Character c : player.getHand()) {
+            result += c + "(" + LetterValues.get(c) + ") ";
         }
 
         return result + "\n\n";
@@ -339,5 +353,21 @@ public class Game {
 
     public void clearScoredWords() {
         scoredWords = "";
+    }
+
+    public void endGame() {
+        isEnded = true;
+    }
+
+    public boolean isEnded() {
+        return isEnded;
+    }
+
+    public void setLastTurn(TurnType lastTurn) {
+        this.lastTurn = lastTurn;
+    }
+
+    public TurnType getLastTurn() {
+        return lastTurn;
     }
 }

@@ -10,6 +10,7 @@ public class KeyboardFactory {
 
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         List<InlineKeyboardButton> row = new ArrayList<>();
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
 
         // Create 'play' button
         InlineKeyboardButton playButton = new InlineKeyboardButton();
@@ -28,6 +29,44 @@ public class KeyboardFactory {
         passButton.setText("Pass");
         passButton.setCallbackData("pass");
         row.add(passButton);
+
+        // Create 'show letter values' button
+        InlineKeyboardButton letterButton = new InlineKeyboardButton();
+        letterButton.setText("Show letter values");
+        letterButton.setCallbackData("values");
+        row2.add(letterButton);
+
+        // Create exit button
+        InlineKeyboardButton exitButton = new InlineKeyboardButton();
+        exitButton.setText("Exit");
+        exitButton.setCallbackData("exit");
+        row2.add(exitButton);
+
+        keyboard.add(row);
+        keyboard.add(row2);
+        inlineKeyboard.setKeyboard(keyboard);
+
+        return inlineKeyboard;
+    }
+
+    public static InlineKeyboardMarkup getFirstKeyboard() {
+        InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup();
+
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+
+        // Create 'start' button
+        InlineKeyboardButton startButton = new InlineKeyboardButton();
+        startButton.setText("start");
+        startButton.setCallbackData("start"); // This data will be sent to your bot when the button is clicked
+        row.add(startButton);
+
+        // Create 'join' button
+        InlineKeyboardButton joinButton = new InlineKeyboardButton();
+        joinButton.setText("join");
+        joinButton.setCallbackData("join");
+        row.add(joinButton);
+
 
         keyboard.add(row);
         inlineKeyboard.setKeyboard(keyboard);

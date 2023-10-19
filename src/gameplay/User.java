@@ -13,6 +13,7 @@ public class User {
     private Turn myTurn;
     private Player myPlayer;
     private boolean readyToNotify = false;
+    public boolean sendGameOverMessage = false;
 
     String response = "";
     private Status status = Status.UNINITIALIZED;
@@ -27,9 +28,6 @@ public class User {
         return userId;
     }
 
-    public void welcome() {
-        response += "Welcome to the game! Please enter Start or Join";
-    }
 
     public void resetResponse() {
         response = "";
@@ -40,6 +38,12 @@ public class User {
     }
 
     public void handleCommand(String messageReceived, long userId) {
+        if (game.isEnded()) {
+            response += "Game was ended... Enter start or join for a new one!";
+            status = Status.UNINITIALIZED;
+            return;
+        }
+
         switch (status) {
             case UNINITIALIZED -> handleInitialization(messageReceived);
             case SEARCHING -> findGame(messageReceived);
@@ -64,7 +68,6 @@ public class User {
         handCopy.addAll(myPlayer.getHand());
 
         for (Character c : charArray) {
-            System.out.println(handCopy);
             if (!handCopy.contains(c)) {
                 response += "Swap failed, some letters weren't found\n\n";
                 status = Status.TAKE_TURN;
@@ -81,11 +84,17 @@ public class User {
         response += "Swap successful! \n\n";
         showGameState();
         endTurn();
+        game.setLastTurn(TurnType.SWAP);
     }
 
     private void pass() {
         System.out.println("Passing turn");
         endTurn();
+        if (game.getLastTurn() == TurnType.PASS) {
+            game.endGame();
+            sendGameOverMessage = true;
+        }
+        game.setLastTurn(TurnType.PASS);
     }
 
     private void addDefaultMessage() {
@@ -102,6 +111,8 @@ public class User {
             case "SWAP" -> status = Status.SWAP;
             case "PASS" -> status = Status.PASS;
             case "PLAY" -> status = Status.PLAY_WORD;
+            case "VALUES" -> status = Status.SHOW_LETTERS;
+            case "EXIT" -> status = Status.EXITED;
         }
         addPlayPrompt(status);
     }
@@ -111,7 +122,21 @@ public class User {
             case SWAP -> response += "Enter tiles to swap, with no separation, like this: ABCD";
             case PLAY_WORD -> response += "Enter your word and its coordinates / direction (across or down), like this: Word h6 down";
             case PASS -> pass();
+            case SHOW_LETTERS -> showLetters();
+            case EXITED -> exitGame();
         }
+    }
+
+    private void exitGame() {
+        game.endGame();
+        response += "Game ended successfully. Enter start or join for new game: ";
+        status = Status.UNINITIALIZED;
+        readyToNotify = true;
+    }
+
+    private void showLetters() {
+        response += game.showPlayerHandWithLetterValues(myPlayer);
+        status = Status.TAKE_TURN;
     }
 
 
@@ -121,7 +146,6 @@ public class User {
             return true;
         } else if (!isMyTurn()) {
             response += "Not your turn! Wait for other player.\n\n";
-            showGameState();
             return true;
         }
         return false;
@@ -129,11 +153,12 @@ public class User {
 
     private void addIdToGame(String messageReceived) {
         if (GameLibrary.containsGame(messageReceived)) {
-            response += "Already taken :( try again! Enter your passcode: ";
+            response += "Already taken :(";
+            status = Status.UNINITIALIZED;
         } else {
             GameLibrary.add(messageReceived, game);
             response += "Game created with passcode: " + messageReceived + "\n\n";
-            showGameState();
+            response += "We will notify you when your opponent joins.";
             status = Status.TAKE_TURN;
         }
     }
@@ -145,6 +170,7 @@ public class User {
         myPlayer.setUserID(userId);
         response += "You were added to the game!";
         status = Status.JOINED;
+        readyToNotify = true;
         myTurn = Turn.TWO;
     }
 
@@ -163,10 +189,10 @@ public class User {
             game = GameLibrary.get(messageReceived);
             response += "Found your game! Enter your name: \n";
             status = Status.GET_P2_NAME;
-        } else if (messageReceived.equals("EXIT")) {
+        }
+        else {
+            response += "Couldn't find a game with that id... Type start or join: ";
             status = Status.UNINITIALIZED;
-        } else {
-            response += "Couldn't find a game with that id... Try again or type EXIT to start over: ";
         }
     }
 
@@ -205,6 +231,7 @@ public class User {
             response += game.getScoredWords();
             showGameState();
             endTurn();
+            game.setLastTurn(TurnType.PLAY);
             game.clearScoredWords();
         } catch (ArrayIndexOutOfBoundsException e) {
             game.clearScoredWords();
@@ -283,5 +310,13 @@ public class User {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public gameplay.Game getGame() {
+        return game;
+    }
+
+    public void welcome() {
+        response += "Welcome to scrabble bot!\n";
     }
 }

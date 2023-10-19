@@ -1,6 +1,5 @@
 import dictionary.Dictionary;
-import gameplay.Status;
-import gameplay.User;
+import gameplay.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -51,8 +50,11 @@ public class ScrabbleBot extends TelegramLongPollingBot {
                 user.welcome();
             }
             sendResponse(userId, user.getResponse());
-            if (user.getStatus() == Status.TAKE_TURN && user.isMyTurn()) {
+            if (user.getStatus() == Status.TAKE_TURN && user.isMyTurn()
+                    && user.getGame().isReady()) {
                 sendMenu(userId);
+            } else if (user.getStatus() == Status.UNINITIALIZED){
+                sendTitleMenu(user.getId());
             }
         } catch (Exception e) {
             sendResponse(userId, "Something went wrong in the backend :( Try again later");
@@ -73,15 +75,50 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         if (user.getStatus() == Status.JOINED) {
             response = "Other player has joined! Your turn: \n\n";
             user.setStatus(Status.TAKE_TURN);
-        } else {
-            response = "Other player has played! Your turn: \n\n";
-        }
+            response += opponent.getGameState();
+        } else if (user.sendGameOverMessage == true) {
+            response += gameOverMessage(user);
+            users.remove(user);
+            user.resetResponse();
+            sendResponse(user.getId(), response);
 
-        response += opponent.getGameState();
+            users.remove(opponent);
+            sendResponse(opponent.getId(), response);
+            return;
+        } else if (user.getGame().isEnded()) {
+            System.out.println("Sending notification to opponent" + opponent.getId());
+            sendResponse(opponent.getId(), "Game was ended by opponent... They must be scared to lose!");
+            opponent.setStatus(Status.UNINITIALIZED);
+            sendTitleMenu(opponent.getId());
+            return;
+        }
+        else {
+            response = "Other player has played! Your turn: \n\n";
+            response += opponent.getGameState();
+        }
 
         sendResponse(opponent.getId(), response);
         sendMenu(opponent.getId());
         user.wasNotified();
+    }
+
+    private String gameOverMessage(User user) {
+        Game game = user.getGame();
+        Player p1 = user.getGame().getPlayerOne();
+        Player p2 = user.getGame().getPlayerTwo();
+        String result = "Game over, the final score is... \n\n";
+
+        result += game.getScore() + "\n";
+
+        if (p1.getScore() > p2.getScore()) {
+            result += p1.getName() + " wins! \uD83C\uDF89\uD83C\uDF89\uD83C\uDF89";
+        } else if (p2.getScore() > p1.getScore()) {
+            result += p2.getName() + " wins! \uD83C\uDF89\uD83C\uDF89\uD83C\uDF89";
+        } else {
+            result += "It's a tie, you both did great!";
+        }
+
+        return result;
     }
 
     private int userExists(long userId) {
@@ -129,7 +166,19 @@ public class ScrabbleBot extends TelegramLongPollingBot {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
-        System.out.println("Sent menu to user!");
+    private void sendTitleMenu(long userId) {
+        SendMessage message = new SendMessage();
+
+        message.setText("Enter start or join: ");
+        message.setChatId(userId);
+        message.setReplyMarkup(KeyboardFactory.getFirstKeyboard());
+        message.setParseMode("Markdown");
+        try {
+            execute(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

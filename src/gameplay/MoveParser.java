@@ -38,7 +38,6 @@ public class MoveParser {
         } else {
             throw new RuntimeException("Invalid direction in word!");
         }
-        System.out.println("Created move with: " + word + " " + x + y + d);
         return new Move(word, x, y, d);
     }
 

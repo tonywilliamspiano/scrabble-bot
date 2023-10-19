@@ -55,7 +55,9 @@ public class Player {
             if (hand.size() >=7) {
                 throw new RuntimeException("Hand already full!");
             }
-            hand.add(letterBag.getLetter());
+            else if (!letterBag.isEmpty()) {
+                hand.add(letterBag.getLetter());
+            }
         }
     }
 
